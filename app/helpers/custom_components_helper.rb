@@ -11,6 +11,11 @@ module CustomComponentsHelper
       elm.replace render_notification_subscription_component(subscription_types)
     end
 
+    fragment.css('deadline').each do |elm|
+      deadline = Date.parse(elm[:time])
+      elm.replace(render 'components/deadline', time: deadline, inner_html: elm.inner_html)
+    end
+
     raw(fragment.to_s)
   end
 
