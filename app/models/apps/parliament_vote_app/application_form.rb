@@ -3,6 +3,25 @@ module Apps
     class ApplicationForm
       VOTE_DATE = Date.new(2020, 2, 29)
       DELIVERY_BY_POST_DEADLINE_DATE = VOTE_DATE - 15.days
+      STATE_KEY = ('%s-state' % self.to_s.parameterize).freeze
+      STEP_DEPENDENCIES = ActiveSupport::HashWithIndifferentAccess.new({
+          start: [],
+          sk_citizen: [:start], # -> permanent_resident, non_sk_nationality
+          permanent_resident: [:sk_citizen], # -> place, world_abroad_permanent_resident
+          place: [:permanent_resident], # -> delivery, home, world_sk_permanent_resident
+          world_abroad_permanent_resident: [:permanent_resident], # -> world_abroad_permanent_resident_end
+          world_abroad_permanent_resident_end: [:world_abroad_permanent_resident], # -> end
+          world_sk_permanent_resident: [:place], # -> world_sk_permanent_resident_end
+          world_sk_permanent_resident_end: [:world_sk_permanent_resident], # -> end
+          delivery: [:place], # -> identity, person, authorized_person
+          authorized_person: [:delivery], # -> authorized_person_send
+          authorized_person_send: [:authorized_person], # -> end
+          person: [:delivery], # none
+          identity: [:delivery], # -> delivery_address
+          delivery_address: [:identity], # -> send,
+          send: [:delivery_address], # -> end
+          end: [:send, :authorized_person_send, :world_sk_permanent_resident_end, :world_abroad_permanent_resident_end]
+      })
 
       include ActiveModel::Model
 
@@ -148,9 +167,19 @@ module Apps
         end
       end
 
+      def allowed_step?(step)
+        dependencies = STEP_DEPENDENCIES.fetch(step, [])
+        return true if dependencies.empty?
+        
+        result = dependencies.map do |dependent_step|
+          valid?(dependent_step) && allowed_step?(dependent_step)
+        end
+        result.any?
+      end
+
       private def start_step(listener)
         self.step = 'sk_citizen'
-        listener.render :sk_citizen
+        listener.redirect_to_step :sk_citizen
       end
 
       private def sk_citizen_step(listener)
@@ -158,31 +187,31 @@ module Apps
           case sk_citizen
           when 'yes'
             self.step = 'permanent_resident'
-            listener.render :permanent_resident
+            listener.redirect_to_step :permanent_resident
           when 'no'
-            listener.redirect_to action: :non_sk_nationality
+            listener.redirect_to_step :non_sk_nationality
           end
         else
-          listener.render :sk_citizen
+          listener.render_form
         end
       end
 
       private def place_step(listener)
         if go_back?
           self.step = 'permanent_resident'
-          listener.render :permanent_resident
+          listener.redirect_to_step :permanent_resident
         elsif valid?(:place)
           case place
           when 'home'
-            listener.redirect_to action: :home
+            listener.redirect_to_step :home
           when 'sk'
-            listener.redirect_to action: :delivery
+            listener.redirect_to_step :delivery
           when 'world'
             self.step = 'world_sk_permanent_resident'
-            listener.render :world_sk_permanent_resident
+            listener.redirect_to_step :world_sk_permanent_resident
           end
         else
-          listener.render :place
+          listener.render_form
         end
       end
 
@@ -192,51 +221,51 @@ module Apps
           case delivery
           when 'post'
             self.step = 'identity'
-            listener.render :identity
+            listener.redirect_to_step :identity
           when 'authorized_person'
             self.step = 'authorized_person'
-            listener.render :authorized_person
+            listener.redirect_to_step :authorized_person
           when 'person'
-            listener.redirect_to action: :person
+            listener.redirect_to_step :person
           end
         else
-          listener.render :delivery
+          listener.render_form
         end
       end
 
       private def identity_step(listener)
         if go_back?
           self.step = 'delivery'
-          listener.render :delivery
+          listener.redirect_to_step :delivery
         elsif valid?(:identity)
           self.step = 'delivery_address'
-          listener.render :delivery_address
+          listener.redirect_to_step :delivery_address
         else
-          listener.render :identity
+          listener.render_form
         end
       end
 
       private def delivery_address_step(listener)
         if go_back?
           self.step = 'identity'
-          listener.render :identity
+          listener.redirect_to_step :identity
         elsif valid?(:delivery_address)
           self.step = 'send'
-          listener.render :send
+          listener.redirect_to_step :to_send
         else
-          listener.render :delivery_address
+          listener.render_form
         end
       end
 
       private def authorized_person_step(listener)
         if go_back?
           self.step = 'delivery'
-          listener.render :delivery
+          listener.redirect_to_step :delivery
         elsif valid?(:authorized_person)
-          listener.render :authorized_person_send
+          listener.redirect_to_step :authorized_person_send
         else
           self.step = 'authorized_person'
-          listener.render :authorized_person
+          listener.render_form
         end
       end
 
@@ -245,48 +274,48 @@ module Apps
           case permanent_resident
           when 'yes'
             self.step = 'place'
-            listener.render :place
+            listener.redirect_to_step :place
           when 'no'
             self.step = 'world_abroad_permanent_resident'
-            listener.render :world_abroad_permanent_resident
+            listener.redirect_to_step :world_abroad_permanent_resident
           end
         else
-          listener.render :permanent_resident
+          listener.render_form
         end
       end
 
       private def world_sk_permanent_resident_step(listener)
         if go_back?
           self.step = 'place'
-          listener.render :place
+          listener.redirect_to_step :place
         elsif valid?(:world_sk_permanent_resident)
           self.step = 'world_sk_permanent_resident_end'
-          listener.render :world_sk_permanent_resident_end
+          listener.redirect_to_step :world_sk_permanent_resident_end
         else
-          listener.render :world_sk_permanent_resident
+          listener.render_form
         end
       end
 
       private def world_sk_permanent_resident_end_step(listener)
         self.step = 'world_sk_permanent_resident_end'
-        listener.render :world_sk_permanent_resident_end
+        listener.redirect_to_step :world_sk_permanent_resident_end
       end
 
       private def world_abroad_permanent_resident_step(listener)
         if go_back?
           self.step = 'permanent_resident'
-          listener.render :permanent_resident
+          listener.redirect_to_step :permanent_resident
         elsif valid?(:world_abroad_permanent_resident)
           self.step = 'world_abroad_permanent_resident_end'
-          listener.render :world_abroad_permanent_resident_end
+          listener.redirect_to_step :world_abroad_permanent_resident_end
         else
-          listener.render :world_abroad_permanent_resident
+          listener.render_form
         end
       end
 
       private def world_abroad_permanent_resident_end_step(listener)
         self.step = 'world_abroad_permanent_resident_end'
-        listener.render :world_abroad_permanent_resident_end
+        listener.redirect_to_step :world_abroad_permanent_resident_end
       end
     end
   end

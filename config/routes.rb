@@ -69,10 +69,20 @@ Rails.application.routes.draw do
             get :home, path: 'hlasovanie-v-mieste-trvaleho-bydliska'
             get :person, path: 'hlasovaci-preukaz-osobne'
             get :non_sk_nationality, path: 'hlasovanie-neobcana'
-            get :delivery, path: 'hlasovaci-preukaz'
-            post :delivery, path: 'hlasovaci-preukaz'
-            get :world, path: 'hlasovanie-v-zahranici'
-            post :world, path: 'hlasovanie-v-zahranici'
+
+            match :authorized_person, path: 'splnomocnena-osoba', via: [:get, :post]
+            match :authorized_person_send, path: 'zaslanie-ziadosti-splnomocnena-osoba', via: [:get, :post]
+            match :delivery, path: 'sposob-prebratia-preukazu', via: [:get, :post]
+            match :delivery_address, path: 'postova-adresa', via: [:get, :post]
+            match :identity, path: 'osobne-udaje', via: [:get, :post]
+            match :permanent_resident, path: 'trvaly-pobyt', via: [:get, :post]
+            match :place, path: 'miesto', via: [:get, :post]
+            match :to_send, path: 'zaslanie-ziadosti', via: [:get, :post]
+            match :sk_citizen, path: 'obcan-sr', via: [:get, :post]
+            match :world_abroad_permanent_resident, path: 'hlasovanie-v-zahranici-nerezident', via: [:get, :post]
+            match :world_abroad_permanent_resident_end, path: 'volba-postou-nerezident', via: [:get, :post]
+            match :world_sk_permanent_resident, path: 'hlasovanie-v-zahranici-rezident', via: [:get, :post]
+            match :world_sk_permanent_resident_end, path: 'volba-postou-rezident', via: [:get, :post]
           end
         end
       end
