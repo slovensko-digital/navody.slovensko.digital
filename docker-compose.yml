@@ -1,0 +1,44 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:12
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME:-navody_slovensko_digital_development}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    expose:
+      - 5432/tcp
+    networks:
+      - navody
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  app:
+    image: navody
+    build: .
+    command: "tail -f /dev/null"
+    depends_on:
+      - db
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgresql://postgres@db/${DATABASE_NAME:-navody_slovensko_digital_development}
+    networks:
+      - navody
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - bundler:/app/vendor/bundle
+      - node_modules:/app/node_modules
+networks:
+  navody:
+    driver: bridge
+volumes:
+  bundler:
+    driver: local
+  node_modules:
+    driver: local
+  pg_data:
+    driver: local

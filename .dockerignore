@@ -1,0 +1,6 @@
+.circleci
+Dockerfile
+.git/
+.gitignore
+node_modules/
+vendor/bundle/
