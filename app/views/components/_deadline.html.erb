@@ -1,0 +1,10 @@
+<div class="navody-deadline">
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <span class="govuk-warning-text__text">
+      <span class="govuk-warning-text__assistive">Upozornenie</span>
+      <strong>Do termínu ostáva <%= (local_assigns[:time] - Date.today).to_i %> dní.</strong>
+      <%= raw inner_html %>
+    </span>
+  </div>
+</div>
