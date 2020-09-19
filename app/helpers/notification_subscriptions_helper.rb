@@ -1,4 +1,10 @@
-module NotificationSubscriptionsHelper
+module NotificationSubscriptionsHelper  # def render_notification_subscription_component_single(subscription_types, journey: nil, content: nil, time: nil, &block)
+  #   content = capture(&block) if block_given?
+  #   group = NotificationSubscription.new(type: subscription_types, confirmation_sent_at: time)
+  #   group.user = current_user
+  #   group.journey = journey
+  #   render partial: 'notification_subscriptions/component', locals: {group: group, content: content}
+  # end
   def render_notification_subscription_component(subscription_types, journey: nil, content: nil, &block)
     content = capture(&block) if block_given?
     group = NotificationSubscriptionGroup.new(subscription_types: subscription_types)

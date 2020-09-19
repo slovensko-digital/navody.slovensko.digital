@@ -7,4 +7,41 @@
       <%= raw inner_html %>
     </span>
   </div>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary, noselect">
+      <span class="govuk-details__summary-text">
+        Tip: chcem dostať upozornenie pred termínom
+      </span>
+    </summary>
+      <%= render_notification_subscription_component ['DeadlineSubscription'] do %>
+        <h3 class="govuk-heading-m">Pošleme vám na email notifikáciu aby ste nazabudli.</h3>
+      <% end %>
+  </details>
+
 </div>
+
+
+<style>
+  .navody-deadline {
+    background-color: #eeeaea;
+    border-radius: 20px;
+    box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+    /*background-color: none;*/
+    color: white;
+    /*border: 2px solid black;*/
+    margin: 20px;
+    padding: 20px;
+  }
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome, Edge, Opera and Firefox */
+  color: #2873c4;
+}
+</style>

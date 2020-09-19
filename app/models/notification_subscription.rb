@@ -45,6 +45,11 @@ class NotificationSubscription < ApplicationRecord
       sendinblue_list_name: 'CarOwnerSubscription',
       label: 'Chcem dostávať novinky týkajúce sa majiteľov motorových vozidiel',
       hint: 'Dostávajte relevatné informácie týkajúce sa motorových vozidiel na email.'
+    },
+    'DeadlineSubscription' => {
+      sendinblue_list_name: 'DeadlineSubscription',
+      label: 'Chcem dostávať upozornenia k deadline termínom',
+      hint: 'Zašleme Vám správu na pripomenutie vybavenia zálžitosti pred deadlinom.',
     }
   }
 
