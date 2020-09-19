@@ -1,0 +1,237 @@
+<style>
+  .autocomplete__hint,
+  .autocomplete__option {
+    font-family: "Roboto", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .autocomplete__hint,
+  .autocomplete__input {
+    padding: 5px 35px 5px 5px;
+    font-family: "Roboto", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 1.25;
+    height: 40px;
+  }
+
+  @media (min-width: 40.0625em) {
+    .autocomplete__hint,
+    .autocomplete__input {
+      font-size: 18px;
+      font-size: 1.125rem;
+      line-height: 1.33333;
+    }
+  }
+</style>
+
+<%= stylesheet_link_tag 'accessible-autocomplete', media: 'all', 'data-turbolinks-track': 'reload' %>
+<%= javascript_include_tag 'apps/ep_vote_app/libs.js', 'data-turbolinks-track': 'reload' %>
+<script>
+  var MUNICIPALITIES_AUTOCOMPLETE_SETTINGS = {
+    id: 'apps_parliament_vote_app_application_form_municipality',
+    name: 'apps_parliament_vote_app_application_form[municipality]',
+    displayMenu: 'overlay',
+    showAllValues: true,
+    autoselect: true,
+    confirmOnBlur: false,
+    defaultValue: '<%=j @application_form.municipality %>',
+    tNoResults: function () {
+      return 'Obec sa nenašla.';
+    }
+  };
+
+  var MUNICIPALITIES_AUTOCOMPLETE_EMAIL_ELEMENT = document.querySelector('#apps_parliament_vote_app_application_form_municipality_email');
+  var MUNICIPALITIES_AUTOCOMPLETE_NOT_FOUND_CALLBACK = function (municipality) {};
+  var MUNICIPALITIES_AUTOCOMPLETE_FOUND_CALLBACK = function (municipality, payload) {
+    var elm = document.getElementById('apps_parliament_vote_app_application_form_municipality_email_verified');
+    elm.value = payload['status'];
+  };
+
+  /* ------------------------------------------------------------ */
+  /* ------------------------------------------------------------ */
+  /* ------------------------------------------------------------ */
+
+  var SPREADSHEET_JSON_URL = 'https://spreadsheets.google.com/feeds/list/1UWA_P-OrH-IvmZnqO89FF2OzQ3gdhQCi3HLRHKx4RZI/oc4boel/public/values?alt=json';
+
+  function convertSourceDataToMunicipality(data) {
+    var CONST_MUNICIPALITY = 'gsx$obec';
+    var CONST_PRIMARY_EMAIL = 'gsx$editaciesemfinalakinyakoij';
+    var CONST_EMAIL = 'gsx$emailprevolbupostou';
+    var CONST_COUNTY = 'gsx$okres';
+    var CONST_STATUS = 'gsx$status';
+
+    var result = {
+      municipalityName: data[CONST_MUNICIPALITY]['$t'],
+      countyName: data[CONST_COUNTY]['$t'],
+      email: data[CONST_PRIMARY_EMAIL]['$t'] == '' ? data[CONST_EMAIL]['$t'] : data[CONST_PRIMARY_EMAIL]['$t'],
+      payload: {
+        status: data[CONST_STATUS]['$t']
+      }
+    };
+
+    return result;
+  }
+
+  /* ------------------------------------------------------------ */
+  /* ------------------------------------------------------------ */
+  /* ------------------------------------------------------------ */
+
+  (function () {
+    var CONST_MUNICIPALITY = 0;
+    var CONST_EMAIL = 1;
+    var CONST_COUNTY = 2;
+    var CONST_PAYLOAD = 3;
+    var CONST_SEARCH_TEXT = 4;
+    var CONST_LABEL = 5;
+
+    function loadMunicipalities (response)
+    {
+      var CONST_INTERNAL_INDEX = 0;
+      var CONST_INTERNAL_COUNTY = 1;
+
+      var municipalityIndices = {};
+      var result = [];
+
+      if (response.feed && response.feed.entry)
+      {
+        $.each(response.feed.entry, function (i, data) {
+          var item = convertSourceDataToMunicipality(data);
+          var countyName = item.countyName;
+
+          if (!municipalityIndices[item.municipalityName])
+          {
+            municipalityIndices[item.municipalityName] = [i, countyName];
+            countyName = '';
+          }
+          else
+          {
+            var duplicate = municipalityIndices[item.municipalityName];
+            result[duplicate[CONST_INTERNAL_INDEX]][CONST_COUNTY] = duplicate[CONST_INTERNAL_COUNTY];
+          }
+
+          result.push([
+            item.municipalityName,
+            item.email,
+            countyName,
+            item.payload
+          ]);
+        });
+      }
+
+      return result;
+    }
+
+    $.getJSON(SPREADSHEET_JSON_URL, function (response) {
+
+      SLOVAK_MUNICIPALITIES = loadMunicipalities(response);
+
+      var settings = MUNICIPALITIES_AUTOCOMPLETE_SETTINGS;
+      var emailField = MUNICIPALITIES_AUTOCOMPLETE_EMAIL_ELEMENT;
+      var notFoundHandler = MUNICIPALITIES_AUTOCOMPLETE_NOT_FOUND_CALLBACK;
+      var foundHandler = MUNICIPALITIES_AUTOCOMPLETE_FOUND_CALLBACK;
+
+      var municipalities = [];
+      var municipalityIndices = {};
+
+      for (var i = 0; i < SLOVAK_MUNICIPALITIES.length; i++)
+      {
+        var municipality = SLOVAK_MUNICIPALITIES[i];
+
+        var searchText = replaceDiacritics(municipality[CONST_MUNICIPALITY]).toLowerCase();
+        var label = municipality[CONST_MUNICIPALITY] + (municipality[CONST_COUNTY] !== '' ? (' (' + municipality[CONST_COUNTY] + ')') : '');
+
+        SLOVAK_MUNICIPALITIES[i][CONST_SEARCH_TEXT] = searchText.replace(/[ -]+/g, ' ');
+        SLOVAK_MUNICIPALITIES[i][CONST_LABEL] = label;
+
+        municipalities.push(label);
+        municipalityIndices[label] = municipality;
+      }
+
+      function setEmailField (value)
+      {
+        var municipality = municipalityIndices[value] ? municipalityIndices[value] : null;
+
+        if (null === municipality)
+        {
+          notFoundHandler(value);
+        }
+        else
+        {
+          emailField.value = municipalityIndices[value][CONST_EMAIL] ? municipalityIndices[value][CONST_EMAIL] : '';
+          foundHandler(municipality, municipality[CONST_PAYLOAD]);
+        }
+      }
+
+      settings['onConfirm'] = setEmailField;
+      settings['source'] = function (query, populateResults) {
+        var results = [];
+
+        if (query === '')
+        {
+          results = municipalities;
+        }
+        else
+        {
+          var term = replaceDiacritics(query).toLowerCase();
+
+          for (var i = 0; i < municipalities.length && results.length < 50; i++)
+          {
+            var municipality = SLOVAK_MUNICIPALITIES[i];
+
+            if (municipality[CONST_LABEL] === query)
+            {
+              results.push(municipality[CONST_LABEL]);
+            }
+            else
+            {
+              var index = municipality[CONST_SEARCH_TEXT].indexOf(term);
+
+              if (index > -1 && (index === 0 || municipality[CONST_SEARCH_TEXT][index - 1] === ' '))
+              {
+                results.push(municipality[CONST_LABEL]);
+              }
+            }
+          }
+        }
+
+        results = results.sort(function (a, b) {
+          return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        });
+
+        populateResults(results);
+      };
+
+      settings['dropdownArrow'] = function (config) {
+        return '<svg class="' + config.className + '" style="top: 8px;" viewBox="0 0 512 512" ><path d="M256,298.3L256,298.3L256,298.3l174.2-167.2c4.3-4.2,11.4-4.1,15.8,0.2l30.6,29.9c4.4,4.3,4.5,11.3,0.2,15.5L264.1,380.9  c-2.2,2.2-5.2,3.2-8.1,3c-3,0.1-5.9-0.9-8.1-3L35.2,176.7c-4.3-4.2-4.2-11.2,0.2-15.5L66,131.3c4.4-4.3,11.5-4.4,15.8-0.2L256,298.3  z"/></svg>';
+      };
+
+      var elm = document.querySelector('.input-to-replace');
+      if (elm) {
+        //Replace input field with new <div> which is then used by accessibleAutocomplete
+        var divForAutocomplete = document.createElement('div');
+        divForAutocomplete.id = 'municipality-field';
+        divForAutocomplete.className = 'govuk-input--width-20 govuk-input-autocomplete';
+        elm.parentElement.appendChild(divForAutocomplete);
+        elm.remove();
+      }
+
+      settings.element = document.getElementById('municipality-field');
+
+      accessibleAutocomplete(settings);
+
+      if (settings.defaultValue)
+      {
+        setEmailField(settings.defaultValue);
+      }
+
+      document.getElementById(settings.id).addEventListener('change', function (event) {
+        setEmailField(event.target.value);
+      });
+    });
+  })();
+</script>

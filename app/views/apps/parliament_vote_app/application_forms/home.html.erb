@@ -1,0 +1,11 @@
+<%= content_for :title, build_page_title('Hlasovanie v mieste trvalého bydliska', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Nepotrebujete nič vybavovať</h1>
+    <p class="govuk-body-lead">V čase volieb volíte vo volebnom okrsku, v ktorom ste zapísaný podľa miesta vášho trvalého bydliska.</p>
+    <p class="govuk-body-lead">O volebnom okrsku informuje obec v oznámení o čase a miesta konania volieb. V deň konania volieb si nezabudnite do volebnej miestnosti priniesť občiansky preukaz.</p>
+    <%= render 'apps/parliament_vote_app/application_forms/subscribe' %>
+  </div>
+</div>

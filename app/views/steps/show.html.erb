@@ -6,7 +6,7 @@
   <div class="govuk-grid-column-two-thirds">
     <div class="govuk-body sdn-content">
       <h1><%= @current_step.title %></h1>
-      <%= raw_with_custom_components @current_step.description %>
+      <%= raw_with_custom_components @current_step.description, journey: @journey %>
     </div>
 
     <%= render 'journeys/todo_list', step: @current_step %>

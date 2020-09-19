@@ -1,0 +1,13 @@
+<%= content_for :title, build_page_title('Zápis do zoznamu voličov', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">V parlamentných voľbách nemôžete voliť</h1>
+    <p class="govuk-body-lead">
+      Vo voľbách do Národnej rady Slovenskej republiky (parlamentné voľby) môžu voliť len občania Slovenskej republiky.
+    </p>
+
+    <%= render 'apps/parliament_vote_app/application_forms/subscribe' %>
+  </div>
+</div>

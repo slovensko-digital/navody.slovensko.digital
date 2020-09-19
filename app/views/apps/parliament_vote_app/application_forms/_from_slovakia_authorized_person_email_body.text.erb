@@ -1,0 +1,19 @@
+Dobrý deň,
+
+týmto žiadam o vydanie hlasovacieho preukazu pre voľby do Národnej rady SR <%= model.year %>.
+
+Moje identifikačné údaje sú:
+
+Meno: <%= model.full_name %>
+Rodné číslo: <%= model.pin %>
+Trvalý pobyt: <%= model.street %>, <%= model.pobox%> <%= model.municipality %>
+Štátna príslušnosť: slovenská
+
+Preukaz vyzdvihne splnomocnená osoba:
+
+Meno: <%= model.authorized_person_full_name %>
+Číslo občianskeho preukazu: <%= model.authorized_person_pin %>
+
+Zároveň žiadam o zaslanie potvrdenia, že ste túto žiadosť prijali.
+
+Ďakujem.

@@ -1,6 +1,6 @@
 <div class="govuk-!-margin-top-5">
   <h3 class="govuk-heading-m govuk-!-margin-bottom-1">
-    <%= link_to page.title, faq_path(page.slug), class: 'govuk-link' %>
+    <%= link_to page.title, page.is_faq? ? faq_path(page.slug) : page, class: 'govuk-link' %>
   </h3>
   <p class="govuk-body-s">
     <%= searched_text(page.content, query) %>

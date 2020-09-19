@@ -1,0 +1,39 @@
+<%= content_for :title, build_page_title('Spôsob prevzatia hlasovacieho preukazu', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_for @application_form, :builder => AppFormBuilder, url: request.original_url do |f| %>
+      <%= render 'apps/parliament_vote_app/application_forms/back', form: f %>
+      <%= render 'components/error_summary', form: @application_form %>
+      <%= f.hidden_field :step %>
+      <%= f.hidden_field :full_name %>
+      <%= f.hidden_field :pin %>
+      <%= f.hidden_field :street %>
+      <%= f.hidden_field :pobox %>
+      <%= f.hidden_field :municipality %>
+      <%= f.hidden_field :municipality_email %>
+      <%= f.hidden_field :municipality_email_verified %>
+
+      <h1 class="govuk-heading-l">Kam chcete zaslať hlasovací preukaz?</h1>
+
+      <div class="govuk-form-group <% if @application_form.errors[:same_delivery_address].any? %> govuk-form-group--error<% end %>">
+        <%= f.error_message :same_delivery_address %>
+
+        <div class="govuk-radios" data-module="radios">
+          <%= f.radio_button :same_delivery_address, '1', label: "Na adresu trvalého bydliska", hint: @application_form.full_address%>
+          <%= f.radio_button :same_delivery_address, '0', label: "Na inú adresu", data: {'aria-controls' => 'conditional-delivery-address'}%>
+
+          <div id="conditional-delivery-address" class="govuk-radios__conditional<% if @application_form.same_delivery_address == 'no' %> govuk-radios__conditional--hidden<% end %>">
+            <%= f.text_field :delivery_street, label: 'Ulica a číslo', hint: 'Napríklad: Kaštieľska 2', class: 'govuk-input--width-20', 'autocomplete': 'address-line1' %>
+            <%= f.text_field :delivery_pobox, label: 'PSČ', hint: 'Napríklad: 841 01', class: 'govuk-input--width-5', 'autocomplete': 'postal-code' %>
+            <%= f.text_field :delivery_municipality, label: 'Obec', class: 'govuk-input--width-10', 'autocomplete': 'address-level2' %>
+            <%= f.text_field :delivery_country, label: 'Štát', class: 'govuk-input--width-10', 'autocomplete': 'country-name' %>
+          </div>
+        </div>
+      </div>
+
+      <%= f.submit 'Pokračovať' %>
+    <% end %>
+  </div>
+</div>

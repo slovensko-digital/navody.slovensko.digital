@@ -1,6 +1,5 @@
 class Page < ApplicationRecord
   include Searchable
-  default_scope { order(position: :asc) }
   scope :faq, -> { where(is_faq: true) }
 
   validates :title, presence: true
@@ -11,11 +10,15 @@ class Page < ApplicationRecord
   # FIXME: fill in position from id!
 
   multisearchable against: %i(content_search),
-                  if: :is_faq?,
+                  if: :searchable?,
                   additional_attributes: -> (page) {
                     { title: page.title_search,
                       keywords: page.keywords_search }
                   }
+
+  def searchable?
+    is_faq? || is_searchable?
+  end
 
   def to_param
     slug

@@ -4,12 +4,12 @@
       <div class="sdn-feedbackbar__useful">
         <div id="sdn-feedbackbar-useful">
           <span class="sdn-feedbackbar__useful-question">Boli tieto informácie pre vás užitočné?</span>
-          <span>
+          <span class="govuk-!-display-inline-block">
             <span class="sdn-feedbackbar__yes" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-thanks" data-disappear="sdn-feedbackbar-useful">
-              <%= link_to 'Áno', feedbacks_path(feedback_type: 'Useful', current_path: request.fullpath), class: 'sdn-feedbackbar__link', remote: true, method: :post %>
+              <a href="#" id="ga-feedback-useful" class="sdn-feedbackbar__link">Áno</a>
             </span>
             <span class="sdn-feedbackbar__no" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-form-no" data-disappear="sdn-feedbackbar-container">
-              <a href="#" class="sdn-feedbackbar__link">Nie</a>
+              <a href="#" id="ga-feedback-not-useful" class="sdn-feedbackbar__link">Nie</a>
             </span>
           </span>
         </div>
@@ -20,9 +20,28 @@
       <div class="sdn-feedbackbar__foundbug">
         <span>Našli ste na stránke chybu?&nbsp;</span>
         <span>
-          <a href="#" class="sdn-feedbackbar__link" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-form-foundbug" data-disappear="sdn-feedbackbar-container">Napíšte nám</a>
+          <a href="#" id="ga-feedback-bug-report" class="sdn-feedbackbar__link" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-form-foundbug" data-disappear="sdn-feedbackbar-container">Napíšte nám</a>
         </span>
       </div>
+    </div>
+    <div id="sdn-feedbackbar-form-yes" class="sdn-feedbackbar__form govuk-!-padding-4 sdn-appear-link-hide">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h3 class="govuk-heading-m">Ešte posledný krok</h3>
+        </div>
+        <div class="govuk-grid-column-one-third" style="text-align:right">
+          <a href="#" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-container" data-disappear="sdn-feedbackbar-form-yes">Zatvoriť</a>
+        </div>
+      </div>
+      <%= form_with url: feedbacks_path do |form| %>
+        <%= hidden_field_tag :feedback_type, 'Useful' %>
+        <%= hidden_field_tag :current_path, request.fullpath %>
+        <div class="govuk-form-group">
+          <%= recaptcha_tags hl: 'sk' %>
+        </div>
+        <%= form.submit 'Odoslať', class: 'govuk-button', data: { 'disable-with': 'Odosielam...' } %>
+        <p class="govuk-body feedback-submitted-feedback govuk-!-padding-left-4 govuk-!-padding-top-2 govuk-!-display-inline-block"></p>
+      <% end %>
     </div>
     <div id="sdn-feedbackbar-form-no" class="sdn-feedbackbar__form govuk-!-padding-4 sdn-appear-link-hide">
       <div class="govuk-grid-row">
@@ -30,7 +49,7 @@
           <h3 class="govuk-heading-m">Pomôžte nám zlepšiť Návody.Digital</h3>
         </div>
         <div class="govuk-grid-column-one-third" style="text-align:right">
-          <a href="#" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-container" data-disappear="sdn-feedbackbar-form-no">zatvoriť</a>
+          <a href="#" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-container" data-disappear="sdn-feedbackbar-form-no">Zatvoriť</a>
         </div>
       </div>
       <div class="govuk-grid-row">
@@ -46,6 +65,9 @@
               <%= label_tag :email, 'Vaša e-mailová adresa', class: 'govuk-label' %>
               <%= email_field_tag :email, @__current_user&.email, class: 'govuk-input govuk-!-width-two-thirds' %>
             </div>
+            <div class="govuk-form-group">
+              <%= recaptcha_tags hl: 'sk' %>
+            </div>
             <%= form.submit 'Odoslať', class: 'govuk-button', data: { "disable-with": "Odosielam..." } %>
             <p class="govuk-body feedback-submitted-feedback govuk-!-padding-left-4 govuk-!-padding-top-2 govuk-!-display-inline-block"></p>
           <% end %>
@@ -59,7 +81,7 @@
           <p class="govuk-body">Pomocou tohto formuláru môžete nahlásiť chybu v návode, alebo na stránke. Neuvádzajte prosím svoje osobné údaje.</p>
         </div>
         <div class="govuk-grid-column-one-third" style="text-align:right">
-          <a href="#" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-container" data-disappear="sdn-feedbackbar-form-foundbug">zatvoriť</a>
+          <a href="#" data-module="sdn-appear-link" data-appear="sdn-feedbackbar-container" data-disappear="sdn-feedbackbar-form-foundbug">Zatvoriť</a>
         </div>
       </div>
       <div class="govuk-grid-row">
@@ -74,6 +96,9 @@
             <div class="govuk-form-group">
               <%= label_tag :bug_what_went_wrong, 'Čo sa nepodarilo?', class: 'govuk-label' %>
               <%= text_area_tag :bug_what_went_wrong, nil, class: 'govuk-textarea', rows: 3, required: true %>
+            </div>
+            <div class="govuk-form-group">
+              <%= recaptcha_tags hl: 'sk' %>
             </div>
             <%= form.submit 'Odoslať', class: 'govuk-button', data: { "disable-with": "Odosielam..." } %>
             <p class="govuk-body feedback-submitted-feedback govuk-!-padding-left-4 govuk-!-padding-top-2 govuk-!-display-inline-block"></p>

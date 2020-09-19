@@ -11,7 +11,7 @@
   <%= form.text_field :keywords %>
   <%= form.select :published_status, Journey.defined_enums['published_status'] %>
   <%= form.select :image_name, Dir.glob("app/assets/images/journeys/*").map { |path| File.basename(path) } %>
-  <%= form.number_field :featured_position %>
+  <%= form.number_field :position %>
   <%= form.text_area :description, size: "60x12" %>
 
   <div class="actions">

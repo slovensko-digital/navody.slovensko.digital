@@ -1,6 +1,6 @@
 class Admin::StepsController < Admin::AdminController
   before_action :set_journey
-  before_action :set_step, only: [:show, :edit, :update, :destroy, :reposition]
+  before_action :set_step, only: [:edit, :update, :destroy, :reposition]
 
   # GET /steps
   def index
@@ -38,8 +38,19 @@ class Admin::StepsController < Admin::AdminController
 
   # DELETE /steps/1
   def destroy
-    @step.destroy
-    redirect_to admin_journey_steps_url(@step.journey), notice: 'Step was successfully destroyed.'
+    recently_active_steps = @step.user_steps
+                               .where('updated_at > ?', 1.month.ago)
+                               .where.not('status in (?)', ['done', 'not_started'])
+    recently_active_tasks = @step.user_tasks.where('user_tasks.updated_at > ?', 1.month.ago)
+
+    if (recently_active_steps.any? || recently_active_tasks.any?) && params[:confirmed] != 'true'
+      respond_to do |format|
+        format.js
+      end
+    else
+      @step.destroy
+      redirect_to admin_journey_steps_url(@step.journey), notice: 'Step was successfully destroyed.'
+    end
   end
 
   # POST /steps/1/reposition

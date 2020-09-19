@@ -1,4 +1,8 @@
 class NotificationSubscriptionsController < ApplicationController
+  def index
+    @metadata.og.image = 'og-subscriptions.jpg'
+  end
+
   def create
     @group = NotificationSubscriptionGroup.new
     @group.email = params[:notification_subscription_group][:email]

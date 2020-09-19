@@ -1,0 +1,14 @@
+<% if form.errors.any? %>
+  <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+    <h2 class="govuk-error-summary__title" id="error-summary-title">
+      Formulár obsahuje <% if form.errors.messages.size > 1 %>chyby<% else %>chybu<% end %>
+    </h2>
+    <div class="govuk-error-summary__body">
+      <ul class="govuk-list govuk-error-summary__list" data-turbolinks="false">
+        <% form.errors.messages.each do |id, msg| %>
+          <li><a href="#<%= form.model_name.singular %>_<%= id %>"><%= msg.first %></a></li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

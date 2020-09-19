@@ -1,0 +1,18 @@
+<div style="width: 600px; max-width: 100%; box-sizing: border-box; border: 1px solid black; padding: 20px;">
+  <div id="vote-app"></div>
+  <script>
+    (function() {
+      var iframe = document.createElement('iframe');
+      iframe.setAttribute('style', 'border: none !important; display: block !important;');
+      iframe.setAttribute('src', 'http://localhost:3000/aplikacie/parlamentne-volby');
+      iframe.setAttribute('scrolling', 'no');
+      iframe.width = '100%';
+      document.querySelector('#vote-app').appendChild(iframe);
+      window.addEventListener('message', function(e) {
+        var data = e.data;
+        if (!data.__NAVODY) return;
+        iframe.height = e.data.height;
+      });
+    })();
+  </script>
+</div>

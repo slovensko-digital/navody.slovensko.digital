@@ -19,7 +19,7 @@
         <td class="govuk-table__cell"><%= link_to step.title, [step.journey, step] %></td>
         <td class="govuk-table__cell"><%= link_to "Tasks (#{step.tasks.count})", admin_journey_step_tasks_path(step.journey, step) %></td>
         <td class="govuk-table__cell"><%= link_to 'Edit', edit_admin_journey_step_path(step.journey, step) %></td>
-        <td class="govuk-table__cell"><%= link_to 'Destroy', [:admin, step.journey, step], method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td class="govuk-table__cell"><%= link_to 'Destroy', [:admin, step.journey, step], method: :delete, data: { confirm: 'Are you sure?' }, remote: true %></td>
       </tr>
     <% end %>
   </tbody>

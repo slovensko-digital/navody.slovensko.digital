@@ -52,7 +52,7 @@ class AppFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   def radios(method, text, options = {}, &block)
-    radios_div = @template.content_tag(:div, class: 'govuk_radios') do
+    radios_div = @template.content_tag(:div, class: 'govuk_radios', id: "#{@object.model_name.singular}_#{method}") do
       @template.concat @template.capture(&block)
     end
     radios_fs = field_set(method, text, options) do

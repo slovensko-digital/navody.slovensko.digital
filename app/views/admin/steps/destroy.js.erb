@@ -1,0 +1,10 @@
+var confirmed = confirm('This step is currently active for some users. Do you really confirm this action?');
+if (confirmed == true) {
+    jQuery.ajax({
+        type: "DELETE",
+        url: '<%= admin_journey_step_url(@step.journey, @step, confirmed: true) %>',
+        headers: {
+            'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+}

@@ -18,6 +18,7 @@
 /tmp/*
 !/log/.keep
 !/tmp/.keep
+!/tmp/pids/.keep
 
 # Ignore uploaded files in development
 /storage/*
@@ -39,7 +40,7 @@
 # Ignore coverage
 /coverage
 
-/.env
+/.env*
 
 /public/packs
 /public/packs-test

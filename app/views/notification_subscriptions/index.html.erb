@@ -1,0 +1,20 @@
+<% content_for :title, 'Užitočné notifikácie na email' %>
+<% content_for :description, 'Aby vám neunikol dôležitý termín, povinnosť či príležitosť.' %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full govuk-grid-column-two-thirds-from-desktop">
+    <h2 class="govuk-heading-l">Aktivujte si užitočné notifikácie na email</h2>
+    <p class="govuk-body">Aby vám neunikol dôležitý termín, povinnosť či príležitosť, aktivujte si notifikácie.<br><strong>Jeden email raz za čas, žiadny spam.</strong></p>
+
+    <div class="sdn-content">
+      <%= render_notification_subscription_component([
+        'NewsletterSubscription',
+        'VoteSubscription',
+        'CompanyNewsletterSubscription',
+        'NGOSubscription',
+        'SelfEmployedSubscription',
+        'CarOwnerSubscription'
+      ]) %>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,6 @@
 class StepsController < ApplicationController
   before_action :redirect_inactive_eu_application, only: :show
+  before_action :redirect_inactive_parliament_application, only: :show
 
   def show
     @journey = Journey.published.find_by!(slug: params[:journey_id])
@@ -43,5 +44,10 @@ class StepsController < ApplicationController
   private def redirect_inactive_eu_application
     return if Apps::EpVoteApp::ApplicationForm.active?
     redirect_to apps_ep_vote_app_application_forms_path if params[:journey_id] == "volby-do-eu-parlamentu"
+  end
+
+  private def redirect_inactive_parliament_application
+    return if Apps::ParliamentVoteApp::ApplicationForm.active?
+    redirect_to apps_ep_vote_app_application_forms_path if params[:journey_id] == "parlamentne-volby"
   end
 end

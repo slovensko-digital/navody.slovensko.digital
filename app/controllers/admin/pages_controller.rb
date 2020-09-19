@@ -54,6 +54,6 @@ class Admin::PagesController < Admin::AdminController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def page_params
-    params.require(:page).permit(:title, :keywords, :content, :slug, :is_faq, :position)
+    params.require(:page).permit(:title, :keywords, :content, :slug, :is_faq, :is_searchable, :position, :image_name)
   end
 end

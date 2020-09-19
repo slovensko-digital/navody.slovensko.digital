@@ -10,7 +10,7 @@
           <div class="govuk-grid-column-full">
             <div class="sdn-tiles">
               <% @documents.each do |searchable| %>
-                <%= link_to decide_searchable_path(searchable), class: 'sdn-tiles__item sdn-tile' do %>
+                <%= link_to searchable, class: 'sdn-tiles__item sdn-tile' do %>
                   <%= image_tag "journeys/#{searchable.image_name.presence || "placeholder.png"}", class: 'sdn-tile__image' %>
                   <span class="sdn-tile__content sdn-tile-content-text-block">
                     <span class="sdn-tile-content-text-block__item"><%= searchable.title %></span>

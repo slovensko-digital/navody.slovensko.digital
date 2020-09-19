@@ -2,11 +2,11 @@
   <div class="govuk-grid-column-two-thirds">
     <div class="govuk-body sdn-content">
       <% if @journey.description.present? %>
-        <%= raw_with_custom_components @journey.description %>
+        <%= raw_with_custom_components @journey.description, journey: @journey %>
       <% else  %>
         <h2>Na tomto návode ešte len pracujeme</h2>
         <p>Ak nám necháte svoju emailovú adresu, budeme vedieť, že ho potrebujete a dáme vám vedieť hneď ako bude pripravený.</p>
-        <%= render_notification_subscription_component ['BlankJourneySubscription', 'NewsletterSubscription'], journey: journey %>
+        <%= render_notification_subscription_component ['BlankJourneySubscription', 'NewsletterSubscription'], journey: @journey %>
       <% end %>
       <p><em>Návody.Digital sú komunitný projekt, ak nám chcete pomôcť napríklad aj s týmto návodom, <a href="mailto:navody@slovensko.digital">ozvite sa nám</a>.</em></p>
     </div>

@@ -5,27 +5,214 @@ SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
-SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
+-- Name: que_validate_tags(jsonb); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+CREATE FUNCTION public.que_validate_tags(tags_array jsonb) RETURNS boolean
+    LANGUAGE sql
+    AS $$
+  SELECT bool_and(
+    jsonb_typeof(value) = 'string'
+    AND
+    char_length(value::text) <= 100
+  )
+  FROM jsonb_array_elements(tags_array)
+$$;
 
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+--
+-- Name: que_jobs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.que_jobs (
+    priority smallint DEFAULT 100 NOT NULL,
+    run_at timestamp with time zone DEFAULT now() NOT NULL,
+    id bigint NOT NULL,
+    job_class text NOT NULL,
+    error_count integer DEFAULT 0 NOT NULL,
+    last_error_message text,
+    queue text DEFAULT 'default'::text NOT NULL,
+    last_error_backtrace text,
+    finished_at timestamp with time zone,
+    expired_at timestamp with time zone,
+    args jsonb DEFAULT '[]'::jsonb NOT NULL,
+    data jsonb DEFAULT '{}'::jsonb NOT NULL,
+    CONSTRAINT error_length CHECK (((char_length(last_error_message) <= 500) AND (char_length(last_error_backtrace) <= 10000))),
+    CONSTRAINT job_class_length CHECK ((char_length(
+CASE job_class
+    WHEN 'ActiveJob::QueueAdapters::QueAdapter::JobWrapper'::text THEN ((args -> 0) ->> 'job_class'::text)
+    ELSE job_class
+END) <= 200)),
+    CONSTRAINT queue_length CHECK ((char_length(queue) <= 100)),
+    CONSTRAINT valid_args CHECK ((jsonb_typeof(args) = 'array'::text)),
+    CONSTRAINT valid_data CHECK (((jsonb_typeof(data) = 'object'::text) AND ((NOT (data ? 'tags'::text)) OR ((jsonb_typeof((data -> 'tags'::text)) = 'array'::text) AND (jsonb_array_length((data -> 'tags'::text)) <= 5) AND public.que_validate_tags((data -> 'tags'::text))))))
+)
+WITH (fillfactor='90');
+
+
+--
+-- Name: TABLE que_jobs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.que_jobs IS '4';
+
+
+--
+-- Name: que_determine_job_state(public.que_jobs); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.que_determine_job_state(job public.que_jobs) RETURNS text
+    LANGUAGE sql
+    AS $$
+  SELECT
+    CASE
+    WHEN job.expired_at  IS NOT NULL    THEN 'expired'
+    WHEN job.finished_at IS NOT NULL    THEN 'finished'
+    WHEN job.error_count > 0            THEN 'errored'
+    WHEN job.run_at > CURRENT_TIMESTAMP THEN 'scheduled'
+    ELSE                                     'ready'
+    END
+$$;
+
+
+--
+-- Name: que_job_notify(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.que_job_notify() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    locker_pid integer;
+    sort_key json;
+  BEGIN
+    -- Don't do anything if the job is scheduled for a future time.
+    IF NEW.run_at IS NOT NULL AND NEW.run_at > now() THEN
+      RETURN null;
+    END IF;
+
+    -- Pick a locker to notify of the job's insertion, weighted by their number
+    -- of workers. Should bounce pseudorandomly between lockers on each
+    -- invocation, hence the md5-ordering, but still touch each one equally,
+    -- hence the modulo using the job_id.
+    SELECT pid
+    INTO locker_pid
+    FROM (
+      SELECT *, last_value(row_number) OVER () + 1 AS count
+      FROM (
+        SELECT *, row_number() OVER () - 1 AS row_number
+        FROM (
+          SELECT *
+          FROM public.que_lockers ql, generate_series(1, ql.worker_count) AS id
+          WHERE listening AND queues @> ARRAY[NEW.queue]
+          ORDER BY md5(pid::text || id::text)
+        ) t1
+      ) t2
+    ) t3
+    WHERE NEW.id % count = row_number;
+
+    IF locker_pid IS NOT NULL THEN
+      -- There's a size limit to what can be broadcast via LISTEN/NOTIFY, so
+      -- rather than throw errors when someone enqueues a big job, just
+      -- broadcast the most pertinent information, and let the locker query for
+      -- the record after it's taken the lock. The worker will have to hit the
+      -- DB in order to make sure the job is still visible anyway.
+      SELECT row_to_json(t)
+      INTO sort_key
+      FROM (
+        SELECT
+          'job_available' AS message_type,
+          NEW.queue       AS queue,
+          NEW.priority    AS priority,
+          NEW.id          AS id,
+          -- Make sure we output timestamps as UTC ISO 8601
+          to_char(NEW.run_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS run_at
+      ) t;
+
+      PERFORM pg_notify('que_listener_' || locker_pid::text, sort_key::text);
+    END IF;
+
+    RETURN null;
+  END
+$$;
+
+
+--
+-- Name: que_state_notify(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.que_state_notify() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    row record;
+    message json;
+    previous_state text;
+    current_state text;
+  BEGIN
+    IF TG_OP = 'INSERT' THEN
+      previous_state := 'nonexistent';
+      current_state  := public.que_determine_job_state(NEW);
+      row            := NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+      previous_state := public.que_determine_job_state(OLD);
+      current_state  := 'nonexistent';
+      row            := OLD;
+    ELSIF TG_OP = 'UPDATE' THEN
+      previous_state := public.que_determine_job_state(OLD);
+      current_state  := public.que_determine_job_state(NEW);
+
+      -- If the state didn't change, short-circuit.
+      IF previous_state = current_state THEN
+        RETURN null;
+      END IF;
+
+      row := NEW;
+    ELSE
+      RAISE EXCEPTION 'Unrecognized TG_OP: %', TG_OP;
+    END IF;
+
+    SELECT row_to_json(t)
+    INTO message
+    FROM (
+      SELECT
+        'job_change' AS message_type,
+        row.id       AS id,
+        row.queue    AS queue,
+
+        coalesce(row.data->'tags', '[]'::jsonb) AS tags,
+
+        to_char(row.run_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS run_at,
+        to_char(now()      AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS time,
+
+        CASE row.job_class
+        WHEN 'ActiveJob::QueueAdapters::QueAdapter::JobWrapper' THEN
+          coalesce(
+            row.args->0->>'job_class',
+            'ActiveJob::QueueAdapters::QueAdapter::JobWrapper'
+          )
+        ELSE
+          row.job_class
+        END AS job_class,
+
+        previous_state AS previous_state,
+        current_state  AS current_state
+    ) t;
+
+    PERFORM pg_notify('que_state', message::text);
+
+    RETURN null;
+  END
+$$;
+
 
 --
 -- Name: apps; Type: TABLE; Schema: public; Owner: -
@@ -87,7 +274,7 @@ CREATE TABLE public.journeys (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     description text,
-    featured_position integer DEFAULT 0 NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
     image_name text,
     custom_title character varying
 );
@@ -162,7 +349,9 @@ CREATE TABLE public.pages (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     "position" integer DEFAULT 0 NOT NULL,
-    keywords text
+    keywords text,
+    image_name character varying,
+    is_searchable boolean DEFAULT false NOT NULL
 );
 
 
@@ -201,7 +390,7 @@ CREATE TABLE public.pg_search_documents (
     title character varying,
     tsv_keywords tsvector,
     tsv_title tsvector,
-    "position" integer DEFAULT 0,
+    featured_position integer DEFAULT 0,
     published boolean DEFAULT false,
     featured boolean DEFAULT false NOT NULL
 );
@@ -227,33 +416,10 @@ ALTER SEQUENCE public.pg_search_documents_id_seq OWNED BY public.pg_search_docum
 
 
 --
--- Name: que_jobs; Type: TABLE; Schema: public; Owner: -
+-- Name: que_jobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.que_jobs (
-    priority smallint DEFAULT 100 NOT NULL,
-    run_at timestamp with time zone DEFAULT now() NOT NULL,
-    job_id bigint NOT NULL,
-    job_class text NOT NULL,
-    args json DEFAULT '[]'::json NOT NULL,
-    error_count integer DEFAULT 0 NOT NULL,
-    last_error text,
-    queue text DEFAULT ''::text NOT NULL
-);
-
-
---
--- Name: TABLE que_jobs; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON TABLE public.que_jobs IS '3';
-
-
---
--- Name: que_jobs_job_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.que_jobs_job_id_seq
+CREATE SEQUENCE public.que_jobs_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -262,10 +428,39 @@ CREATE SEQUENCE public.que_jobs_job_id_seq
 
 
 --
--- Name: que_jobs_job_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: que_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.que_jobs_job_id_seq OWNED BY public.que_jobs.job_id;
+ALTER SEQUENCE public.que_jobs_id_seq OWNED BY public.que_jobs.id;
+
+
+--
+-- Name: que_lockers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE UNLOGGED TABLE public.que_lockers (
+    pid integer NOT NULL,
+    worker_count integer NOT NULL,
+    worker_priorities integer[] NOT NULL,
+    ruby_pid integer NOT NULL,
+    ruby_hostname text NOT NULL,
+    queues text[] NOT NULL,
+    listening boolean NOT NULL,
+    CONSTRAINT valid_queues CHECK (((array_ndims(queues) = 1) AND (array_length(queues, 1) IS NOT NULL))),
+    CONSTRAINT valid_worker_priorities CHECK (((array_ndims(worker_priorities) = 1) AND (array_length(worker_priorities, 1) IS NOT NULL)))
+);
+
+
+--
+-- Name: que_values; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.que_values (
+    key text NOT NULL,
+    value jsonb DEFAULT '{}'::jsonb NOT NULL,
+    CONSTRAINT valid_value CHECK ((jsonb_typeof(value) = 'object'::text))
+)
+WITH (fillfactor='90');
 
 
 --
@@ -557,10 +752,10 @@ ALTER TABLE ONLY public.pg_search_documents ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- Name: que_jobs job_id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: que_jobs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.que_jobs ALTER COLUMN job_id SET DEFAULT nextval('public.que_jobs_job_id_seq'::regclass);
+ALTER TABLE ONLY public.que_jobs ALTER COLUMN id SET DEFAULT nextval('public.que_jobs_id_seq'::regclass);
 
 
 --
@@ -665,7 +860,23 @@ ALTER TABLE ONLY public.pg_search_documents
 --
 
 ALTER TABLE ONLY public.que_jobs
-    ADD CONSTRAINT que_jobs_pkey PRIMARY KEY (queue, priority, run_at, job_id);
+    ADD CONSTRAINT que_jobs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: que_lockers que_lockers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.que_lockers
+    ADD CONSTRAINT que_lockers_pkey PRIMARY KEY (pid);
+
+
+--
+-- Name: que_values que_values_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.que_values
+    ADD CONSTRAINT que_values_pkey PRIMARY KEY (key);
 
 
 --
@@ -873,6 +1084,41 @@ CREATE UNIQUE INDEX index_users_on_email_lower_unique ON public.users USING btre
 
 
 --
+-- Name: que_jobs_args_gin_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX que_jobs_args_gin_idx ON public.que_jobs USING gin (args jsonb_path_ops);
+
+
+--
+-- Name: que_jobs_data_gin_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX que_jobs_data_gin_idx ON public.que_jobs USING gin (data jsonb_path_ops);
+
+
+--
+-- Name: que_poll_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX que_poll_idx ON public.que_jobs USING btree (queue, priority, run_at, id) WHERE ((finished_at IS NULL) AND (expired_at IS NULL));
+
+
+--
+-- Name: que_jobs que_job_notify; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER que_job_notify AFTER INSERT ON public.que_jobs FOR EACH ROW EXECUTE PROCEDURE public.que_job_notify();
+
+
+--
+-- Name: que_jobs que_state_notify; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER que_state_notify AFTER INSERT OR DELETE OR UPDATE ON public.que_jobs FOR EACH ROW EXECUTE PROCEDURE public.que_state_notify();
+
+
+--
 -- Name: pg_search_documents tsv_keywords_update; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1026,6 +1272,10 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190608135807'),
 ('20190608201245'),
 ('20190914143708'),
-('20190914164512');
+('20190914164512'),
+('20190915104202'),
+('20191209121011'),
+('20200316102804'),
+('20200316104715');
 
 

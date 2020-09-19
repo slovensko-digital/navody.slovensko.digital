@@ -71,6 +71,7 @@ class Admin::JourneysController < Admin::AdminController
         :published_status,
         :slug,
         :description,
+        :position,
     )
   end
 end

@@ -1,6 +1,6 @@
 class NotificationSubscription < ApplicationRecord
   self.inheritance_column = 'type2' # change
-
+  validates :journey, presence: true, if: -> {self.type == 'BlankJourneySubscription' }
   TYPES = {
     'EpApplicationFormSubscription' => {
       sendinblue_list_name: 'EpApplicationFormSubscription',
@@ -20,12 +20,32 @@ class NotificationSubscription < ApplicationRecord
     'NewsletterSubscription' => {
       sendinblue_list_name: 'NewsletterSubscription',
       label: 'Chcem odoberať pravidelné novinky Návody.Digital',
-      hint: 'Ak chcete vedieť o ďalších zlepšovákoch, ktoré pripravujeme, zvoľte si aj túto možnosť. Neposielame žiadny spam, bude to užitočné a len raz za čas.',
+      hint: 'Ak chcete vedieť o ďalších zlepšovákoch, ktoré pripravujeme, zvoľte si túto možnosť. Neposielame žiadny spam, bude to užitočné a len raz za čas.',
     },
     'BlankJourneySubscription' => {
       label: 'Chcem odoberať informácie k tomuto návodu',
       hint: 'Zašleme Vám e-mail, keď vytvoríme tento návod alebo sa bude diať niečo relevantné.',
     },
+    'CompanyNewsletterSubscription' => {
+      sendinblue_list_name: 'CompanyNewsletterSubscription',
+      label: 'Chcem dostávať novinky týkajúce sa podnikateľských subjektov',
+      hint: 'Dáme vám vedieť, ak bude potrebné splniť nejakú povinnosť pre vaše podnikanie.'
+    },
+    'NGOSubscription' => {
+      sendinblue_list_name: 'NGOSubscription',
+      label: 'Chcem dostávať novinky týkajúce sa neziskových organizácií',
+      hint: 'Upozorníme vás na prichádzajúce lehoty či povinnosti pre vaše združenie.'
+    },
+    'SelfEmployedSubscription' => {
+      sendinblue_list_name: 'SelfEmployedSubscription',
+      label: 'Chcem dostávať novinky pre samostatne zárobkovo činné osoby',
+      hint: 'Dáme vám vedieť, keď budú mať živnostníci nové povinnosti či možnosti.'
+    },
+    'CarOwnerSubscription' => {
+      sendinblue_list_name: 'CarOwnerSubscription',
+      label: 'Chcem dostávať novinky týkajúce sa majiteľov motorových vozidiel',
+      hint: 'Dostávajte relevatné informácie týkajúce sa motorových vozidiel na email.'
+    }
   }
 
   belongs_to :user, optional: true

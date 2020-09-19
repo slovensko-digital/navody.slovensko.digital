@@ -1,0 +1,37 @@
+<%= content_for :title, build_page_title('Hlasovanie v zahraničí', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Pre voľbu zo zahraničia je potrebné požiadať o voľbu poštou</h1>
+
+    <ol class="govuk-list govuk-list--number govuk-!-font-size-24">
+      <li class="govuk-!-margin-bottom-4">
+        Ak máte na zariadení emailového klienta, 
+        <%= mail_to @application_form.minv_email, 'kliknutím tu priamo otvorte pripravenú žiadosť.'.html_safe,
+          target: '_blank',
+          body: @application_form.world_abroad_resident_email_body,
+          subject: 'Žiadosť o voľbu poštou'
+        %>
+        Alternatívne kliknutím 
+        <a href="#" onclick="document.getElementById('conditional-manual').style.display = 'block'; return false;">tu žiadosť zobrazte</a> a manuálne ju skopírujte do tela emailu.
+        <div id="conditional-manual" <% unless Rails.env.test? %> style="display: none;"<% end %>>
+          <p class="govuk-body govuk-!-margin-top-5">Skopírujte text žiadosti.</p>
+          <div class="govuk-form-group">
+            <textarea onclick="this.focus();this.select();" rows="8" class="govuk-textarea"><%= @application_form.world_abroad_resident_email_body %></textarea>
+          </div>
+        </div>
+      </li>
+      <li class="govuk-!-margin-bottom-4">
+        K žiadosti pripojte fotokópiu časti cestovného dokladu Slovenskej republiky s osobnými údajmi voliča alebo fotokópiu osvedčenia o štátnom občianstve Slovenskej republiky.
+      </li>
+      <li class="govuk-!-margin-bottom-4">
+        Odošlite na emailovú adresu
+        <strong><%= @application_form.minv_email %></strong>.
+      </li>
+      <li class="govuk-!-margin-bottom-4">
+        A potom <%= link_to 'pokračujte ďalej', end_apps_parliament_vote_app_application_forms_path %>.
+      </li>
+    </ol>
+  </div>
+</div>

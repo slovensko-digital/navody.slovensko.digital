@@ -1,0 +1,17 @@
+<%= content_for :title, build_page_title('Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Parlamentné voľby</h1>
+    <p class="govuk-body-l">Parlamentné voľby na Slovensku budú 29. februára 2020.</p>
+    <p class="govuk-body-lead">Či už budete počas volieb mimo trvalého bydliska alebo v zahraničí, táto služba vám pomôže vytvoriť <strong>žiadosť o hlasovací preukaz</strong> alebo <strong>voľbu poštou</strong> tak, aby ste na nič dôležité nezabudli.</p>
+    <p class="govuk-body-lead"><strong>Je to veľmi jednoduché a trvá to len pár minút.</strong></p>
+    <p class="govuk-body-xs">Používaním tejto služby súhlasíte so spracovaním osobných údajov v rozsahu nevyhnutnom pre určenie spôsobu voľby a vytvorenie žiadosti o hlasovací preukaz alebo žiadosti o voľbu poštou.</p>
+    <%= form_for @application_form do |f| %>
+      <div class="govuk-form-group">
+        <%= f.hidden_field :step %>
+      </div>
+      <%= submit_tag 'Súhlasím a chcem začať', class: 'govuk-button govuk-button--large' %>
+    <% end %>
+  </div>
+</div>

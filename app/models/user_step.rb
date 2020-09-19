@@ -9,12 +9,12 @@ class UserStep < ApplicationRecord
   validates :status, inclusion: { in: %w(not_started started waiting done) }
 
   def refresh_status
-    if all_tasks_completed?
-      update_attributes(status: 'done')
+    if all_tasks_completed? && !step.has_app?
+      update(status: 'done')
     elsif user_tasks.completed.none?
-      update_attributes(status: 'not_started')
+      update(status: 'not_started')
     else
-      update_attributes(status: 'started')
+      update(status: 'started')
     end
   end
 

@@ -1,0 +1,32 @@
+<%= content_for :title, build_page_title('Hlasovanie v zahraničí', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+      <% if @application_form.vote_by_post_expired? %>
+        <h1 class="govuk-heading-xl">Termín na zaslanie žiadosti o&nbsp;voľbu poštou uplynul 10.&nbsp;januára</h1>
+        <p class="govuk-body-lead">Žiadosť o voľbu poštou pre voľby do Národnej rady Slovenskej republiky bolo potrebné doručiť na Ministerstvo vnútra najneskôr do 50 dní pred dňom konania volieb.</p>
+        <%= render 'apps/parliament_vote_app/application_forms/next_vote_notifications' %>
+      <% else %>
+        <h1 class="govuk-heading-xl">Ak máte odhlásený trvalý pobyt zo Slovenska, je potrebné požiadať o voľbu poštou</h1>
+        <p class="govuk-body-m">Zákon umožňuje voliť zo zahraničia občanom Slovenskej republiky, ktorí nemajú na jej území trvalý pobyt.</p>
+        <p class="govuk-body-m">Žiadosť o voľbu poštou pre voľby do Národnej rady Slovenskej republiky je potrebné doručiť na Ministerstvo vnútra najneskôr do 50 dní pred dňom konania volieb.</p>
+        <h2 class="govuk-heading-m">Vaše osobné údaje</h2>
+        <%= form_for @application_form, :builder => AppFormBuilder, url: request.original_url do |f| %>
+          <%= render 'components/error_summary', form: @application_form %>
+          <%= f.hidden_field :step %>
+
+          <%= f.text_field :full_name, class: 'govuk-input--width-20', label: 'Meno, priezvisko, titul', hint: 'Ako na cestovnom pase. Napríklad: JUDr. Ján Mrvička', autocomplete: 'name' %>
+          <%= f.text_field :pin, class: 'govuk-input--width-10', label: 'Rodné číslo', hint: 'Napríklad: 123456/1234' %>
+
+          <h2 class="govuk-heading-m">Adresa na zaslanie hlasovacích lístkov</h2>
+          <%= f.text_field :delivery_street, label: 'Ulica', class: 'govuk-input--width-20 delivery-address', 'autocomplete': 'address-line1' %>
+          <%= f.text_field :delivery_pobox, label: 'PSČ', hint: 'Napríklad: 841 01', class: 'govuk-input--width-5 delivery-address', 'autocomplete': 'postal-code' %>
+          <%= f.text_field :delivery_municipality, label: 'Obec', class: 'govuk-input--width-20 input-to-replace delivery-address' %>
+          <%= f.text_field :delivery_country, label: 'Štát', class: 'govuk-input--width-20 input-to-replace delivery-address' %>
+
+          <%= f.submit 'Pokračovať'%>
+      <% end %>
+    <% end %>
+  </div>
+</div>

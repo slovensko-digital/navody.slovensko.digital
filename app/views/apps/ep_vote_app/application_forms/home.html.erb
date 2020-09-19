@@ -6,8 +6,9 @@
     <h2 class="govuk-heading-xl">Hlasovanie v mieste trvalého bydliska</h2>
     <p class="govuk-body-lead">Pre hlasovanie v mieste svojho trvalého bydliska, stačí vo volebnej miestnosti predložiť občiansky preukaz.</p>
 
-    <h3 class="govuk-heading-l">Aktivujte si aj upozornenia na email, aby ste na nič nezabudli.</h3>
-    <%= render_notification_subscription_component ['VoteSubscription', 'NewsletterSubscription'] %>
+    <%= render_notification_subscription_component ['VoteSubscription', 'NewsletterSubscription'] do %>
+      <h3 class="govuk-heading-m">Aktivujte si aj notifikácie na email, aby ste na nič nezabudli.</h3>
+    <% end %>
 
     <h3 class="govuk-heading-l">Čo ďalej?</h3>
     <p class="govuk-body">Ak sa Vám táto aplikácia páčila, na portáli Návody.Digital nájdete <%= link_to 'množstvo ďalších návodov', root_path %> ako vyriešiť aj iné životné situácie, ktoré si vyžadujú kontakt so štátnou byrokraciou.</p>

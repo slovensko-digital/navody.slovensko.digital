@@ -15,7 +15,7 @@
   <tbody class="govuk-table__body">
     <% @documents.each do |document| %>
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><%= document.position %></td>
+        <td class="govuk-table__cell"><%= document.featured_position %></td>
         <td class="govuk-table__cell">
           <% if document.featured? %>
             <%= link_to '&#10004;'.html_safe, hide_admin_document_path(document), method: :put %>
@@ -23,7 +23,7 @@
             <%= link_to '&#10060;'.html_safe, feature_admin_document_path(document), method: :put %>
           <% end %>
         </td>
-        <td class="govuk-table__cell"><%= link_to document.searchable.slug, decide_searchable_path(document.searchable) %></td>
+        <td class="govuk-table__cell"><%= link_to document.searchable.slug, document.searchable %></td>
         <td class="govuk-table__cell"><%= document.searchable_type %></td>
         <td class="govuk-table__cell"><%= link_to 'Edit', edit_admin_document_path(document) %></td>
       </tr>

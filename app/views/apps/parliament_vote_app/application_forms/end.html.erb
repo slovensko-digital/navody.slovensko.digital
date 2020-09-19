@@ -1,0 +1,10 @@
+<%= content_for :title, build_page_title('Notifikácie', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Gratulujeme k&nbsp;úspešnej žiadosti</h1>
+    <p class="govuk-body-lead">Nezabudnite voliť a voľte zodpovedne.</p>
+    <%= render 'apps/parliament_vote_app/application_forms/subscribe' %>
+  </div>
+</div>

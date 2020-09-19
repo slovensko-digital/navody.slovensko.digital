@@ -1,6 +1,6 @@
 class FaqsController < ApplicationController
   def index
-    @pages = Page.faq
+    @pages = Page.faq.order(position: :asc)
   end
 
   def show

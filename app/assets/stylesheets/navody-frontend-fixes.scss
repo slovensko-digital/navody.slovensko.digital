@@ -40,3 +40,23 @@ a.sdn-timeline-dropdown__option {
   padding: 25px 30px 10px 30px;
   background-color: #e5f2e4;
 }
+
+/* TODO move to frontend code */
+.sdn-next-link__link {
+  display: block;
+}
+
+.button-back ,
+.button-back:hover ,
+.button-back:focus ,
+.button-back:active {
+  border: none;
+  background: none;
+  padding: 0 0 0 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.vote-app-back {
+  top: -15px;
+}

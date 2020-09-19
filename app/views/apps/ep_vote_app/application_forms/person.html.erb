@@ -6,8 +6,9 @@
     <h2 class="govuk-heading-xl">Prevzatie hlasovacieho preukazu osobne</h2>
     <p class="govuk-body-lead">Hlasovací preukaz Vám vystavia na počkanie na obecnom úrade v mieste trvalého bydliska. Osobne si preukaz vybavíte najneskôr v posledný pracovný deň pred voľbami, samozrejme len počas pracovných hodín úradu.</p>
 
-    <h3 class="govuk-heading-l">Aktivujte si aj upozornenia na email, aby ste na nič nezabudli.</h3>
-    <%= render_notification_subscription_component ['VoteSubscription', 'NewsletterSubscription'] %>
+    <%= render_notification_subscription_component ['VoteSubscription', 'NewsletterSubscription'] do %>
+      <h3 class="govuk-heading-m">Aktivujte si aj upozornenia na email, aby ste na nič nezabudli.</h3>
+    <% end %>
 
     <h3 class="govuk-heading-l">Čo ďalej?</h3>
     <p class="govuk-body">Ak sa Vám táto aplikácia páčila, na portáli Návody.Digital nájdete <%= link_to 'množstvo ďalších návodov', root_path %> ako vyriešiť aj iné životné situácie, ktoré si vyžadujú kontakt so štátnou byrokraciou.</p>

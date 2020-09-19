@@ -1,61 +1,53 @@
-version: 2
+version: 2.1
+
 jobs:
   build:
     working_directory: ~/slovensko-digital/navody.slovensko.digital
 
     docker:
-      - image: circleci/ruby:2.6.2-node-browsers
+      - image: circleci/ruby:2.6.6-node-browsers
         environment:
-          POSTGRES_HOST: localhost
-          POSTGRES_DB_NAME: circle_ruby_test
-          RAILS_MAX_THREADS: 50
-          RAILS_ENV: test
           CC_TEST_REPORTER_ID: 17d259e00bbff5b020b7f1a6abb6736e0f65b9a517afdcbaeaa79e919730835f
+          PGHOST: localhost
+          RAILS_ENV: test
 
-      - image: circleci/postgres:10-alpine-ram
+      - image: circleci/postgres:12-alpine-ram
         environment:
           POSTGRES_USER: circleci
-          POSTGRES_PASSWORD: ''
+          POSTGRES_HOST_AUTH_METHOD: trust
 
     steps:
       - checkout
       - run: echo "deb http://apt.postgresql.org/pub/repos/apt stretch-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
       - run: wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
       - run: sudo apt-get update
-      - run: sudo apt-get install postgresql-client-10
-      - run: yarn
+      - run: sudo apt-get install postgresql-client-12
+      - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./test-reporter
+      - run: chmod +x ./test-reporter
       - restore_cache: { keys: ['{{ checksum "Gemfile.lock" }}'] }
-      - run: bundle install --path vendor/bundle
+      - run: gem update --system
+      - run: gem install bundler
+      - run: bundle config set deployment true
+      - run: bundle install
       - save_cache: { key: '{{ checksum "Gemfile.lock" }}', paths: [vendor/bundle] }
+      - restore_cache: { keys: ['{{ checksum "yarn.lock" }}'] }
+      - run: yarn install
+      - save_cache: { key: '{{ checksum "yarn.lock" }}', paths: [~/.cache/yarn] }
       - run: dockerize -wait tcp://localhost:5432 -timeout 60s
       - run: bundle exec rake db:create db:structure:load --trace
-      - run:
-          name: Setup Code Climate test-reporter
-          command: |
-            # download test reporter as a static binary
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            chmod +x ./cc-test-reporter
-      - run:
-          name: Run tests
-          command: |
-            ./cc-test-reporter before-build
-            bundle exec rspec --format progress --format RspecJunitFormatter --out test_results/rspec.xml
-            ./cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
-      - store_test_results:
-          path: test_results
+      - run: ./test-reporter before-build
+      - run: bundle exec rspec
+      - run: ./test-reporter after-build --coverage-input-type simplecov --exit-code $?
 
   deploy:
-    working_directory: ~/slovensko-digital/navody.slovensko.digital
-    machine:
-      enabled: true
+    machine: true
+
     steps:
       - checkout
-      - run: git remote add staging dokku@ekosystem.staging.slovensko.digital:navody
-      - run: git push staging
+      - run: git push dokku@staging.slovensko.digital:navody.digital master
 
 workflows:
-  version: 2
-  build-and-deploy:
+  main:
     jobs:
       - build
       - deploy:

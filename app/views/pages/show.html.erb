@@ -1,3 +1,3 @@
 <%= content_for :title, build_page_title(@page.title) %>
 <%= content_for :description, truncate(strip_tags(@page.content), length: 500) %>
-<%= raw @page.content %>
+<%= raw_with_custom_components @page.content %>

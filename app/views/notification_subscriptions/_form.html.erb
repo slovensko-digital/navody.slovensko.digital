@@ -1,21 +1,26 @@
 <%= form_with model: form, id: 'new_subscription_notification_group', html: {novalidate: true} do |f| %>
-  <div class="govuk-form-group
-    <% if form.errors[:subscriptions].any? %> govuk-form-group--error
-    <% end %>">
+  <div class="govuk-form-group <% if form.errors[:subscriptions].any? %> govuk-form-group--error<% end %>">
     <% form.errors[:subscriptions].each do |error| %>
       <span class="govuk-error-message"><%= error %></span>
     <% end %>
-    <div class="govuk-checkboxes">
-      <% form.subscription_types.each_with_index do |type, index| %>
-        <% subscription = NotificationSubscription::TYPES.fetch(type) %>
-        <div class="govuk-checkboxes__item">
-          <%= check_box_tag 'notification_subscription_group[subscriptions][]', type, form.subscriptions.include?(type), {class: 'govuk-checkboxes__input', id: "notification_subscription_group_#{index}"} %>
-          <%= f.label index, subscription[:label], class: 'govuk-label govuk-checkboxes__label govuk-label--s' %>
-          <%= hidden_field_tag 'notification_subscription_group[subscription_types][]', type %>
-          <span class="govuk-hint govuk-checkboxes__hint"><%= subscription[:hint] %></span>
-        </div>
-      <% end %>
-    </div>
+
+    <% if form.subscription_types.count == 1 %>
+      <%= hidden_field_tag 'notification_subscription_group[subscriptions][]', form.subscription_types.first %>
+      <%= hidden_field_tag 'notification_subscription_group[subscription_types][]', form.subscription_types.first %>
+    <% else %>
+      <div class="govuk-checkboxes">
+        <% form.subscription_types.each_with_index do |type, index| %>
+          <% subscription = NotificationSubscription::TYPES[type] %>
+          <% next unless subscription %>
+          <div class="govuk-checkboxes__item">
+            <%= check_box_tag 'notification_subscription_group[subscriptions][]', type, form.subscriptions.include?(type), {class: 'govuk-checkboxes__input', id: "notification_subscription_group_#{index}"} %>
+            <%= f.label index, subscription[:label], class: 'govuk-label govuk-checkboxes__label govuk-label--s' %>
+            <%= hidden_field_tag 'notification_subscription_group[subscription_types][]', type %>
+            <span class="govuk-hint govuk-checkboxes__hint"><%= subscription[:hint] %></span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
   <% unless current_user.logged_in? %>

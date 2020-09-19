@@ -61,11 +61,11 @@ module SearchesHelper
     haystack = text.clone
     match = Array(phrases).map { |p| Regexp.escape(p) }.join('|')
     if options[:ignore_special_chars]
-      haystack = haystack.mb_chars.normalize(:kd)
-      match = match.mb_chars.normalize(:kd).gsub(/[^\x00-\x7F]+/n, '').gsub(/\w/, '\0[^\x00-\x7F]*')
+      haystack = haystack.unicode_normalize(:nfkd)
+      match = match.unicode_normalize(:nfkd).gsub(/[^\x00-\x7F]+/n, '').gsub(/\w/, '\0[^\x00-\x7F]*')
     end
     highlighted = haystack.gsub(/(#{match})(?!(?:[^<]*?)(?:["'])[^<>]*>)/i, options[:highlighter])
-    highlighted = highlighted.mb_chars.normalize(:kc) if options[:ignore_special_chars]
+    highlighted = highlighted.unicode_normalize(:nfkd) if options[:ignore_special_chars]
     highlighted
   end
 end

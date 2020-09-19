@@ -1,6 +1,6 @@
 module Searchable
   extend ActiveSupport::Concern
-  include PgSearch
+  include PgSearch::Model
 
   def to_search_str(str)
     Transliterator.transliterate(str&.downcase)

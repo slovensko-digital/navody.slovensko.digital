@@ -20,7 +20,7 @@ Page.create!(
 )
 
 journey = Journey.create!(
-  featured_position: 1,
+  position: 1,
   title: "Založenie živnosti",
   slug: "zalozenie-zivnosti",
   description: "<h1>Založenie živnosti: krok po kroku</h1>

@@ -79,3 +79,48 @@
     padding: 30px 20px;
     margin: 20px 0;
 }
+
+.body__iframe .navody-template__content > .sdn-phase-banner,
+.body__iframe .sdn-header ,
+.body__iframe .navody-template__footer ,
+.body__iframe .sdn-feedbackbar  {
+    display: none !important;
+}
+
+.body__iframe [type="submit"]:last-child {
+    margin-bottom: 0;
+}
+
+.govuk-input-autocomplete {
+    width: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+    font-size: 1.125rem;
+    line-height: 1.33333;
+    font-family: "Roboto", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.notification-subscription-group {
+    background-color: #fafafa;
+    padding: 2em;
+    margin: 2em 0;
+}
+
+@media (max-width: 414px) {
+    .notification-subscription-group {
+        padding: 1em;
+    }
+}
+
+.notification-subscription-group .govuk-button {
+    border: 2px solid #3a67e8;
+    color: #3a67e8;
+    background-color: inherit;
+    border-radius: 3px;
+    margin-bottom: 0;
+}
+
+.notification-subscription-group .govuk-form-group:last-child {
+    margin-bottom: 0;
+}

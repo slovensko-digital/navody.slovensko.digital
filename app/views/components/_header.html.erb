@@ -19,7 +19,7 @@
             <%= link_to 'O Projekte', page_path('o-projekte'), class: 'sdn-header__link' %>
           </li>
           <li>
-            <%= link_to 'Často kladené otázky', faqs_path, class: 'sdn-header__link' %>
+            <%= link_to 'Užitočné notifikácie', notification_subscription_groups_path, class: 'sdn-header__link' %>
           </li>
           <li class="user-info">
             <% if current_user.logged_in? %>

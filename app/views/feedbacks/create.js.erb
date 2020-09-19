@@ -1,7 +1,1 @@
-// Send feedback to GA
-if (typeof ga === 'function') {
-  ga('send', 'event', 'Feedback', '<%= params[:feedback_type] %>');
-}
-
-// Show feedback to user
-$('.feedback-submitted-feedback').text('Váš podnet bol odoslaný. Ďakujeme.');
+$('.feedback-submitted-feedback').text('<%= @message %>');

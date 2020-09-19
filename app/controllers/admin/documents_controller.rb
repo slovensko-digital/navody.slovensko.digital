@@ -3,7 +3,7 @@ class Admin::DocumentsController < Admin::AdminController
 
   # GET /admin/documents
   def index
-    @documents = PgSearch::Document.featureable.includes(:searchable).select(&:searchable)
+    @documents = PgSearch::Document.featureable.includes(:searchable).order(featured_position: :asc).select(&:searchable)
   end
 
   # GET /admin/documents/1/edit
@@ -30,7 +30,7 @@ class Admin::DocumentsController < Admin::AdminController
       redirect_to admin_documents_url, notice: 'Document was successfully updated.'
     end
   end
-    
+
   def reposition
     PgSearch::Document.reposition_all
     redirect_to admin_documents_path, notice: 'Documents were successfully repositioned.'
@@ -45,7 +45,7 @@ class Admin::DocumentsController < Admin::AdminController
   def document_params
     params.require(:pg_search_document).permit(
       :slug,
-      :position,
+      :featured_position,
     )
   end
 end

@@ -21,7 +21,7 @@
 <table class="govuk-table">
   <thead class="govuk-table__head">
     <tr class="govuk-table__row">
-      <th class="govuk-table__header" scope="col">Featured Pos</th>
+      <th class="govuk-table__header" scope="col">Position</th>
       <th class="govuk-table__header" scope="col">Title</th>
       <th class="govuk-table__header" scope="col"></th>
       <th class="govuk-table__header" scope="col" colspan="2"></th>
@@ -30,7 +30,7 @@
   <tbody class="govuk-table__body">
     <% @journeys.each do |journey| %>
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><%= journey.featured_position %></td>
+        <td class="govuk-table__cell"><%= journey.position %></td>
         <td class="govuk-table__cell"><%= link_to journey.title, journey %> <%= "(#{journey.published_status})" if journey.published_status != 'PUBLISHED' %></td>
         <td class="govuk-table__cell"><%= link_to "Steps (#{journey.steps.count})", admin_journey_steps_path(journey) %></td>
         <td class="govuk-table__cell"><%= link_to 'Edit', edit_admin_journey_path(journey) %></td>

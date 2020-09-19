@@ -1,0 +1,17 @@
+<%= content_for :title, build_page_title('Ste občan SR?', 'Parlamentné voľby') %>
+<%= content_for(:headerline, 'Parlamentné voľby') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_for @application_form, :builder => AppFormBuilder, url: request.original_url do |f| %>
+      <%= render 'components/error_summary', form: @application_form %>
+      <%= f.hidden_field :step %>
+      <%= f.radios :sk_citizen, 'Ste občan Slovenskej republiky?', inline: true do %>
+        <%= f.radio_button :sk_citizen, 'yes', label: "Áno" %>
+        <%= f.radio_button :sk_citizen, 'no', label: "Nie" %>
+      <% end %>
+
+      <%= f.submit 'Pokračovať' %>
+    <% end %>
+  </div>
+</div>

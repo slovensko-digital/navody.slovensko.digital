@@ -1,0 +1,9 @@
+<button type="submit" class="govuk-back-link button-back vote-app-back">Späť</button>
+<%= form.hidden_field :back, value: false %>
+<script>
+  $(document).ready(function() {
+    $(".vote-app-back").on("click", function(e) {
+      $('[name="apps_parliament_vote_app_application_form[back]"]').val(true);
+    });
+  });
+</script>

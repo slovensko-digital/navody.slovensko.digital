@@ -29,13 +29,13 @@
 
 <body class="govuk-template__body">
 <div class="navody-template__content">
+  <%= javascript_include_tag 'iframe', 'data-turbolinks-track': 'reload' %>
   <script>
-    document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');
+    document.body.classList.add('js-enabled');
   </script>
 
   <a href="#hlavny-obsah" class="govuk-skip-link">Preskočiť na hlavný obsah</a>
 
-  <%= render 'components/phase_banner' %>
   <%= render 'components/header' %>
 
   <% if content_for?(:headerline) %>
@@ -65,5 +65,12 @@
   <%= render 'components/footer' %>
 </div>
 <%= render 'shared/google_analytics' %>
+
+<% if content_for?(:json_ld) %>
+  <script type="application/ld+json">
+    <%= yield(:json_ld) %>
+  </script>
+<% end %>
+
 </body>
 </html>
