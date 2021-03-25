@@ -67,3 +67,29 @@ a.sdn-timeline-dropdown__option {
   font-weight: normal;
   text-decoration: underline;
 }
+
+.autocomplete__wrapper {
+  font-family: "Roboto", Arial, sans-serif;
+}
+
+.sdn-submission-form__panel {
+  border-left: 10px solid #ffdd00;
+  background-color: #fff9cc;
+  padding: 2em 2em 1em;
+}
+
+.sdn-submission-form__signature {
+  background-color: #e5f2e4;
+  border-left: 10px solid #00703c;
+  padding: 1em 2em;
+  margin-bottom: 2px;
+}
+
+.sdn-submission-form__signature .govuk-body {
+  margin: 0;
+}
+
+.govuk-input--disabled {
+  background-color: rgba(239, 239, 239, 0.3);
+  border-color: #6f777b;
+}

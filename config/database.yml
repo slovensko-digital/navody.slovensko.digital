@@ -6,13 +6,37 @@ default: &default
   pool: <%= ENV['RAILS_MAX_THREADS'] || 5 %>
 
 development:
-  <<: *default
-  database: navody_slovensko_digital_development
+  primary:
+    <<: *default
+    database: navody_slovensko_digital_development
+  datahub:
+    <<: *default
+    url: <%= ENV['DATAHUB_DATABASE_URL'] %>
+    replica: true
 
 test:
-  <<: *default
-  database: navody_slovensko_digital_test
+  primary:
+    <<: *default
+    database: navody_slovensko_digital_test
+  datahub:
+    <<: *default
+    database: datahub_test
+    replica: true
+
+staging:
+  primary:
+    <<: *default
+    url: <%= ENV['DATABASE_URL'] %>
+  datahub:
+    <<: *default
+    url: <%= ENV['DATAHUB_DATABASE_URL'] %>
+    replica: true
 
 production:
-  <<: *default
-  url: <%= ENV['DATABASE_URL'] %>
+  primary:
+    <<: *default
+    url: <%= ENV['DATABASE_URL'] %>
+  datahub:
+    <<: *default
+    url: <%= ENV['DATAHUB_DATABASE_URL'] %>
+    replica: true

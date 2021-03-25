@@ -4,7 +4,7 @@
       <style type="text/css">
       form {
         display: grid;
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 400px 1fr;
       }
 
       input {
@@ -13,13 +13,33 @@
       }
 
       .container {
-        max-width: 600px;
+        max-width: 1000px;
 
       }
     </style>
   </head>
   <body>
     <div class="container">
+      <h1>Podanie eid</h1>
+      <form method="POST" action='/podania/vseobecna-agenda' enctype="multipart/form-data">
+        <label for="email">submissions_general_agenda[recipient_uri]</label>
+        <input type="text" name="submissions_general_agenda[recipient_uri]" value="ico://sk/00603481" id="email"/>
+
+        <label for="subject">submissions_general_agenda[subject]</label>
+        <input type="text" name="submissions_general_agenda[subject]" value="Predpripraveny nazov ziadost" id="subject"/>
+
+        <label for="body">submissions_general_agenda[body]</label>
+        <input type="text" name="submissions_general_agenda[body]" value="Predpripravene telo ziadosti" id="body"/>
+
+        <label for="require_signed_form">submissions_general_agenda[require_signed_form]</label>
+        <input type="checkbox" name="submissions_general_agenda[require_signed_form]" value="1" id="required_signed_form" checked="checked"/>
+
+        <label for="signed_form_base64">submissions_general_agenda[signed_form_base64]</label>
+        <input type="text" name="submissions_general_agenda[signed_form_base64]" value="" id="signed_form_base64" checked="checked"/>
+        <input type="submit" value="Podať" />
+      </form>
+
+      <h1>Podanie emailme</h1>
       <form method="POST" action='/podania/nove' enctype="multipart/form-data">
         <label for="email">email</label>
         <input type="text" name="submission[email]" value="jan.suchal@slovensko.digital" id="email"/>
@@ -38,17 +58,17 @@
         <label for="attachment_1_encoded_content">submission[attachments[]body_base64]</label>
         <input type="text" name="submission[attachments[]body_base64]" id="attachment_1_content_encoded" value="PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPGRva3VtZW50PgogICA8aGxhdmlja2E+CiAgICAgIDxkaWM+OTAxMTE1Nzc3NTwvZGljPgogICAgICA8emFSb2s+MjAyMDwvemFSb2s+CiAgICAgIDxkb3ZvZERvcGxuZW5pYT4wPC9kb3ZvZERvcGxuZW5pYT4KICAgICAgPGZ5emlja2FPc29iYT4KICAgICAgICAgPHByaWV6dmlza28+VGVzdG92YWPDrTwvcHJpZXp2aXNrbz4KICAgICAgICAgPG1lbm8+Sm96ZWY8L21lbm8+CiAgICAgIDwvZnl6aWNrYU9zb2JhPgogICAgICA8c2lkbG8+CiAgICAgICAgIDxwc2M+ODUxMDE8L3BzYz4KICAgICAgICAgPHVsaWNhPkVpbnN0ZWlub3ZhPC91bGljYT4KICAgICAgICAgPHN1cGlzbmVPcmllbnRhY25lQ2lzbG8+ODQ2NS8xMjwvc3VwaXNuZU9yaWVudGFjbmVDaXNsbz4KICAgICAgICAgPG9iZWM+QnJhdGlzbGF2YTwvb2JlYz4KICAgICAgICAgPHN0YXQ+U2xvdmVuc2vDoSByZXB1Ymxpa2E8L3N0YXQ+CiAgICAgIDwvc2lkbG8+CiAgICAgIDxub3ZhTGVob3RhPgogICAgICAgICA8cHJlZGx6ZW5pZTQ5M2E+MTwvcHJlZGx6ZW5pZTQ5M2E+CiAgICAgICAgIDxwcmVkbHplbmllNDkzYj4wPC9wcmVkbHplbmllNDkzYj4KICAgICAgICAgPGRhdHVtTGVob3RhPjMwLjA2LjIwMjE8L2RhdHVtTGVob3RhPgogICAgICA8L25vdmFMZWhvdGE+" />
 
-<!--        <label for="attachment_1_content_type">Attachment 1 content type:</label>-->
-<!--        <input type="text" name="submissionsubmission[attachments][][content_type]" id="attachment_1_content_type" value="application/xml" />-->
+        <!--        <label for="attachment_1_content_type">Attachment 1 content type:</label>-->
+        <!--        <input type="text" name="submissionsubmission[attachments][][content_type]" id="attachment_1_content_type" value="application/xml" />-->
 
-<!--        <label for="attachment_2_filename">Attachment 2 filename:</label>-->
-<!--        <input type="text" name="submission[attachments][]filename]" id="attachment_2_filename" value="odklad-danoveho-priznania-2.xml"  />-->
+        <!--        <label for="attachment_2_filename">Attachment 2 filename:</label>-->
+        <!--        <input type="text" name="submission[attachments][]filename]" id="attachment_2_filename" value="odklad-danoveho-priznania-2.xml"  />-->
 
-<!--        <label for="attachment_2_encoded_content">Attachment 2 content:</label>-->
-<!--        <input type="text" name="submission[attachments][]content_encoded]" id="attachment_2_encoded_content" value="PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPGRva3VtZW50PgogICA8aGxhdmlja2E+CiAgICAgIDxkaWM+OTAxMTE1Nzc3NTwvZGljPgogICAgICA8emFSb2s+MjAyMDwvemFSb2s+CiAgICAgIDxkb3ZvZERvcGxuZW5pYT4wPC9kb3ZvZERvcGxuZW5pYT4KICAgICAgPGZ5emlja2FPc29iYT4KICAgICAgICAgPHByaWV6dmlza28+VGVzdG92YWPDrTwvcHJpZXp2aXNrbz4KICAgICAgICAgPG1lbm8+Sm96ZWY8L21lbm8+CiAgICAgIDwvZnl6aWNrYU9zb2JhPgogICAgICA8c2lkbG8+CiAgICAgICAgIDxwc2M+ODUxMDE8L3BzYz4KICAgICAgICAgPHVsaWNhPkVpbnN0ZWlub3ZhPC91bGljYT4KICAgICAgICAgPHN1cGlzbmVPcmllbnRhY25lQ2lzbG8+ODQ2NS8xMjwvc3VwaXNuZU9yaWVudGFjbmVDaXNsbz4KICAgICAgICAgPG9iZWM+QnJhdGlzbGF2YTwvb2JlYz4KICAgICAgICAgPHN0YXQ+U2xvdmVuc2vDoSByZXB1Ymxpa2E8L3N0YXQ+CiAgICAgIDwvc2lkbG8+CiAgICAgIDxub3ZhTGVob3RhPgogICAgICAgICA8cHJlZGx6ZW5pZTQ5M2E+MTwvcHJlZGx6ZW5pZTQ5M2E+CiAgICAgICAgIDxwcmVkbHplbmllNDkzYj4wPC9wcmVkbHplbmllNDkzYj4KICAgICAgICAgPGRhdHVtTGVob3RhPjMwLjA2LjIwMjE8L2RhdHVtTGVob3RhPgogICAgICA8L25vdmFMZWhvdGE+CiAgICAgIDx2eXByYWNvdmFsPgogICAgICAgICA8ZG5hPjAyLjAyLjIwMjE8L2RuYT4KICAgICAgPC92eXByYWNvdmFsPgogICAgICA8cG9kcGlzPjE8L3BvZHBpcz4KICAgPC9obGF2aWNrYT4KPC9kb2t1bWVudD4K" />-->
+        <!--        <label for="attachment_2_encoded_content">Attachment 2 content:</label>-->
+        <!--        <input type="text" name="submission[attachments][]content_encoded]" id="attachment_2_encoded_content" value="PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPGRva3VtZW50PgogICA8aGxhdmlja2E+CiAgICAgIDxkaWM+OTAxMTE1Nzc3NTwvZGljPgogICAgICA8emFSb2s+MjAyMDwvemFSb2s+CiAgICAgIDxkb3ZvZERvcGxuZW5pYT4wPC9kb3ZvZERvcGxuZW5pYT4KICAgICAgPGZ5emlja2FPc29iYT4KICAgICAgICAgPHByaWV6dmlza28+VGVzdG92YWPDrTwvcHJpZXp2aXNrbz4KICAgICAgICAgPG1lbm8+Sm96ZWY8L21lbm8+CiAgICAgIDwvZnl6aWNrYU9zb2JhPgogICAgICA8c2lkbG8+CiAgICAgICAgIDxwc2M+ODUxMDE8L3BzYz4KICAgICAgICAgPHVsaWNhPkVpbnN0ZWlub3ZhPC91bGljYT4KICAgICAgICAgPHN1cGlzbmVPcmllbnRhY25lQ2lzbG8+ODQ2NS8xMjwvc3VwaXNuZU9yaWVudGFjbmVDaXNsbz4KICAgICAgICAgPG9iZWM+QnJhdGlzbGF2YTwvb2JlYz4KICAgICAgICAgPHN0YXQ+U2xvdmVuc2vDoSByZXB1Ymxpa2E8L3N0YXQ+CiAgICAgIDwvc2lkbG8+CiAgICAgIDxub3ZhTGVob3RhPgogICAgICAgICA8cHJlZGx6ZW5pZTQ5M2E+MTwvcHJlZGx6ZW5pZTQ5M2E+CiAgICAgICAgIDxwcmVkbHplbmllNDkzYj4wPC9wcmVkbHplbmllNDkzYj4KICAgICAgICAgPGRhdHVtTGVob3RhPjMwLjA2LjIwMjE8L2RhdHVtTGVob3RhPgogICAgICA8L25vdmFMZWhvdGE+CiAgICAgIDx2eXByYWNvdmFsPgogICAgICAgICA8ZG5hPjAyLjAyLjIwMjE8L2RuYT4KICAgICAgPC92eXByYWNvdmFsPgogICAgICA8cG9kcGlzPjE8L3BvZHBpcz4KICAgPC9obGF2aWNrYT4KPC9kb2t1bWVudD4K" />-->
 
-<!--        <label for="attachment_2_content_type">Attachment 2 content type:</label>-->
-<!--        <input type="text" name="submission[attachments][][content_type]" id="attachment_2_content_type" value="application/xml" />-->
+        <!--        <label for="attachment_2_content_type">Attachment 2 content type:</label>-->
+        <!--        <input type="text" name="submission[attachments][][content_type]" id="attachment_2_content_type" value="application/xml" />-->
 
 
         <label for="template_id">submission[extra][template_id]</label>

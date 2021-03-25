@@ -1,0 +1,16 @@
+<div id="submission-actions">
+  <% if @general_agenda.token.present? %>
+    <% if @general_agenda.requires_signed_form? && !@general_agenda.form_signed? %>
+      <div class="govuk-inset-text">Toto podanie <strong>musíte podpísať elektronickým podpisom</strong>. Na podpisovanie je potrebné mať nainštalovaný podpisovač.</div>
+      <%= submit_tag "Podpísať podanie", class: 'govuk-button', formaction: sign_submissions_general_agenda_path %>
+    <% else %>
+      <%= submit_tag "Odoslať ako #{@general_agenda.token_payload['name']}", formaction: submit_submissions_general_agenda_path, class: 'govuk-button' %>
+      <% url = URI.join(ENV['SLOVENSKO_SK_API_URL'], "logout?callback=#{switch_account_callback_submissions_general_agenda_url}&token=#{@general_agenda.token}").to_s %>
+      <%= link_to 'Prihlásiť sa ako iný subjekt', switch_account_callback_submissions_general_agenda_path, target: :login, class: 'govuk-button govuk-link' %>
+    <% end %>
+  <% else %>
+    <div class="govuk-inset-text">Aby ste mohli odoslať takéto podanie, <strong>musíte sa prihlásiť pomocou elektronického občianskeho preukazu (eID)</strong>. Ak neviete eID používať, prečítajte si <%= link_to 'návod na jeho aktiváciu', journey_path('aktivacia-eid') %>.</div>
+    <% url = URI.join(ENV['SLOVENSKO_SK_API_URL'], "login?callback=#{login_callback_submissions_general_agenda_url}").to_s %>
+    <%= link_to 'Prihlásiť sa pomocou eID', url, target: :login, class: 'govuk-button', data: {controller: 'eid', action: 'eid#start'} %>
+  <% end %>
+</div>

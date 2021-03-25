@@ -5,7 +5,7 @@
     <% end %>
 
     <% if form.subscription_types.count == 1 %>
-      <%= hidden_field_tag 'notification_subscription_group[selected_subscription_types][]', form.subscription_types.first %>
+      <%= hidden_field_tag 'notification_subscription_group[selected_subscription_types][]', form.selected_subscription_types.first %>
       <%= hidden_field_tag 'notification_subscription_group[subscription_types][]', form.subscription_types.first %>
     <% else %>
       <div class="govuk-checkboxes">

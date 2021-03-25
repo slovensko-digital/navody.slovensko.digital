@@ -1,0 +1,8 @@
+<% content_for :title, build_page_title('Všeobecná agenda', 'Podania') %>
+<% content_for :description, sanitize_description('Všeobecné podanie pomocou prihlásenia cez eID') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+    <%= render partial: 'form' %>
+  </div>
+</div>

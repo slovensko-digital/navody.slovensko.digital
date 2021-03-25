@@ -1,4 +1,33 @@
 class AppFormBuilder < ActionView::Helpers::FormBuilder
+  def text_area(method, options = {})
+    group_classes = ['govuk-form-group']
+    field_classes = ['govuk-textarea', options[:class]]
+    described_by = []
+
+    label = options.delete(:label)
+    label = label(method, label, class: 'govuk-label') if label
+
+    hint = options.delete(:hint)
+    if hint
+      hint = @template.content_tag(:span, hint, id: hint_id(method), class: 'govuk-hint')
+      described_by << hint_id(method)
+    end
+
+    if @object.errors[method].present?
+      group_classes << 'govuk-form-group--error'
+      field_classes << 'govuk-textarea--error'
+      described_by << error_id(method)
+    end
+
+    options = options.merge({'aria-describedby': described_by.join(' ')}) unless described_by.empty?
+
+    @template.content_tag(:div, class: group_classes) do
+      @template.concat label
+      @template.concat hint
+      @template.concat error_message(method)
+      @template.concat super(method, objectify_options(options.merge({class: field_classes})))
+    end
+  end
 
   def text_field(method, options = {})
     group_classes = ['govuk-form-group']
@@ -97,7 +126,7 @@ class AppFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   def submit(value = nil, options = {})
-    super(value, objectify_options(options.merge({class: ['govuk-button', options[:class]]})))
+    super(value, options.merge({class: ['govuk-button', options[:class]]}))
   end
 
   def error_message(method)

@@ -107,11 +107,32 @@ Rails.application.routes.draw do
   resources :pages, path: '', only: 'show'
   resources :feedbacks, path: 'spatna-vazba'
 
+  namespace :submissions, path: 'podania' do
+    resource :general_agenda, path: 'vseobecna-agenda', path_names: { new: '' }, only: [:new, :create] do
+      get :login_callback
+      get :switch_account_callback
+      post :new, path: ''
+      post :sign, path: 'podpisat'
+      post :submit, path: 'odoslat'
+      post :continue, path: 'pokracovat'
+      get :finish, path: 'hotovo'
+    end
+  end
+
   resources :submissions, path: 'podania' do
     post :start, path: 'nove', on: :collection # public facing API
     get :download_file, path: 'stiahnut'
     post :finish, path: 'dokoncit'
 
     get :test, on: :collection unless Rails.env.production?
+  end
+
+  # data utils
+  namespace :datahub do
+    namespace :upvs do
+      resources :public_authority_edesks do
+        get :search, on: :collection
+      end
+    end
   end
 end

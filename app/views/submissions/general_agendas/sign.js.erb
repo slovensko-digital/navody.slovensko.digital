@@ -1,0 +1,7 @@
+if(confirm('PODPISAT?')) {
+  signed_data = 'tsads' // TODO zavolat podpisovatko a nastavit podpisany form
+  document.getElementById('submissions_general_agenda_signed_form_base64').value = signed_data;
+  Rails.fire(document.getElementById('new_message'), 'submit');
+} else {
+  document.getElementById('new_message').outerHTML = '<%=j render partial: 'form' %>';
+}

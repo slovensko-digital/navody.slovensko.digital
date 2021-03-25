@@ -105,7 +105,6 @@ step.tasks.create!(
 )
 
 CurrentTopic.create!(
-  key: 'Brexit',
-  value: 'A Brexit deal has been agreed but needs to be ratified',
+  body: 'A Brexit deal has been agreed but needs to be ratified',
   enabled: true
 )

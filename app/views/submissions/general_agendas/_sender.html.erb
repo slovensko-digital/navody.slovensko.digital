@@ -1,0 +1,9 @@
+<div id="submission-sender">
+  <% if @general_agenda.token.present? %>
+    <p class="govuk-body">Odosielateľ <%= link_to 'zmeniť', switch_account_callback_submissions_general_agenda_path, target: :login %><br> <span class="govuk-heading-m"><strong><%= @general_agenda.token_payload['name'] %></strong></span></p>
+  <% else %>
+    <div class="govuk-inset-text">Aby ste mohli odoslať takéto podanie, <strong>musíte sa prihlásiť pomocou elektronického občianskeho preukazu (eID)</strong>. Ak neviete eID používať, prečítajte si <%= link_to 'návod na jeho aktiváciu', journey_path('aktivacia-eid') %>.</div>
+    <% url = URI.join(ENV['SLOVENSKO_SK_API_URL'], "login?callback=#{login_callback_submissions_general_agenda_url}").to_s %>
+    <%= link_to 'Prihlásiť sa pomocou eID', url, target: :login, class: 'govuk-button', data: {controller: 'eid', action: 'eid#start'} %>
+  <% end %>
+</div>

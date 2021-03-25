@@ -39,6 +39,7 @@ gem 'que', github: 'chanks/que' # https://github.com/chanks/que/issues/253
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
+gem 'jwt'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-rails_csrf_protection'
