@@ -16,7 +16,20 @@ import '../application.sass'
 import 'controllers'
 import { initAll } from 'navody-digital-frontend'
 
-document.addEventListener('turbolinks:load', function () {
-    // Initialize GovUK/Navody-frontend Javascript
-    initAll();
-});
+(function() {
+    var navody_digital_loaded = false;
+    document.addEventListener('turbolinks:load', function () {
+        if (navody_digital_loaded) {
+            // When page is cached and then loaded from cache, links are generated again if there are already
+            // links generated in cache, workaround is to remove previously generated links. Full solution would be
+            // to put check into 'navody-digital-frontend' and do not generate if links already exist. Similar
+            // turbolinks issue: https://stackoverflow.com/questions/40660288/turbolinks-duplicating-rich-text-editor
+            document.querySelectorAll('.govuk-accordion__controls').forEach(e => e.remove());
+        }
+        initAll();
+        navody_digital_loaded = true;
+    });
+})();
+
+
+
